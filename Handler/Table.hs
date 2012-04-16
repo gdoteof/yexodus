@@ -10,13 +10,13 @@ where
 import Import
 import Helpers.Models
 import Data.Text.Lazy.Builder (Builder, fromText, toLazyText, fromLazyText)
-import qualified Data.Text.Lazy as TL
 import Text.Julius
-import qualified Data.Text as T hiding (null)
 import Data.Maybe
 import Database.Persist.Store
-import qualified Data.Text as T
 import Debug.Trace
+import qualified Data.Text as T hiding (null)
+import qualified Data.Text.Lazy as TL
+import qualified Data.Text as T
 
 tableForm :: Form Table
 tableForm = renderDivs $ Table
@@ -29,11 +29,7 @@ tableForm = renderDivs $ Table
 
 getTablesR :: Handler RepHtml
 getTablesR = do
-    defaultLayout $ do
-        [whamlet|<h1>table list|]
     tables <- runDB $ selectList [] [Desc TableName]
-    -- We'll need the two "objects": articleWidget and enctype
-    -- to construct the form (see templates/articles.hamlet).
     (tableWidget, enctype) <- generateFormPost tableForm
     defaultLayout $ do
         setTitle "Tables"
