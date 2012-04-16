@@ -1,0 +1,8 @@
+<tr ##{containerId}>
+  <td>
+    #{playerName p}
+
+  <td>#{tableName t}
+
+  <td> #{session}
+      <input ##{buttonId} type=submit value="close session"> 

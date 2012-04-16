@@ -1,0 +1,38 @@
+User
+    ident Text
+    password Text Maybe
+    UniqueUser ident
+Email
+    email Text
+    user UserId Maybe
+    verkey Text Maybe
+    UniqueEmail email
+
+Player
+    name Text
+    nick Text
+    email Text Maybe
+    phone Text Maybe
+    note Textarea Maybe
+    minutes Int 
+    inSession Bool
+    deriving Show
+
+Table
+    name Text
+    game Text 
+    pointsHour Int
+    seats Int 
+    description Text Maybe
+    deriving Show Eq
+
+GamingSession
+    start UTCTime
+    end UTCTime Maybe
+    player PlayerId
+    table TableId
+    seat Int Maybe
+    deriving Show
+
+ -- By default this file is used in Model.hs (which is imported by Foundation.hs)
+

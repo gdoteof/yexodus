@@ -1,0 +1,17 @@
+/static StaticR Static getStatic
+/auth   AuthR   Auth   getAuth
+
+/favicon.ico FaviconR GET
+/robots.txt RobotsR GET
+
+/ RootR GET
+
+/player PlayerListR GET POST
+/player/#PlayerId PlayerR GET
+
+/table TablesR GET POST
+/table/#TableId TableR GET
+
+/session GamingSessionsR GET POST
+/session/#GamingSessionId GamingSessionR GET POST
+/session/#GamingSessionId/close GamingSessionCloseR POST

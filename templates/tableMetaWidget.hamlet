@@ -1,0 +1,8 @@
+$forall (table, seats) <- tuple
+      <h3>#{tableName $ entityVal table}
+      <pre>#{show seats}
+
+$forall (t,s) <- availSeats
+      <h3>#{tableName $ entityVal t}
+      <pre>#{show s}
+

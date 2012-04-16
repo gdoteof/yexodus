@@ -1,0 +1,8 @@
+<div> there is a checkin widget
+$if null tableTuple
+  <div .empty-seats>No empty seats
+$else
+  <ul .checkin-widget>
+  $forall (id, tid, table) <- tableTuple
+      <li ##{T.unpack id} .table>#{tableName table} 
+      ^{tableClickHandlerWidget (T.unpack id) tid playerId (Just 3) }
