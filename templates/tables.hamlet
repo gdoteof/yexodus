@@ -1,14 +1,18 @@
-<h1>Tables
-<hr>
-    <form method=post enctype=#{enctype}>
-      ^{tableWidget}
-      <div>
-          <input type=submit value="Create New Table">
-<hr>
-$if null tables
-    <p> You have not created any tables.
-$else
-    <ul>
-        $forall Entity tableId table <- tables
-            <li> 
-                <a href=@{TableR tableId} > #{tableName table}
+<div .row-fluid>
+    <div .span3>
+        <div .well .sidebar-nav>
+          <ul .nav .navlist>
+            <li .nav-header>Tables
+            $if null tables
+                <li> You have not created any tables.
+            $else
+                $forall Entity tableId table <- tables
+                    <li>
+                        <a href=@{TableR tableId}> #{tableName table}
+        <!--/span-->
+    <div .span9>
+        <div .hero-unit>
+          <form method=post enctype=#{enctype}>
+            ^{tableWidget}
+                <input .btn type=submit value="Create New Table">
+        <!--/span-->

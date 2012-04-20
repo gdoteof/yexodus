@@ -37,6 +37,7 @@ library
                      Handler.Table
                      Handler.GamingSession
                      Helpers.Models
+                     Handler.Meta
 
     ghc-options:   -Wall -threaded -O0
     cpp-options:   -DDEVELOPMENT

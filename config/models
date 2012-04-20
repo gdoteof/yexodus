@@ -16,7 +16,7 @@ Player
     note Textarea Maybe
     minutes Int 
     inSession Bool
-    deriving Show
+    deriving Show Eq
 
 Table
     name Text
@@ -32,7 +32,7 @@ GamingSession
     player PlayerId
     table TableId
     seat Int Maybe
-    deriving Show
+    deriving Show Eq
 
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)
 

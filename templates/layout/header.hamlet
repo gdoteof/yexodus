@@ -1,3 +1,4 @@
-<ul>
-  <li .menu-item><a href=@GamingSessionsR>Sessions
-  <li .menu-item><a href=@PlayersR>Players
+<div .navbar>
+  <ul>
+    <li .menu-item><a href=@GamingSessionsR>Sessions
+    <li .menu-item><a href=@PlayersR>Players

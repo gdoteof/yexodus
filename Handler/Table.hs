@@ -64,10 +64,12 @@ tableCheckinWidget playerId= do
      addScriptRemote "http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
      $(widgetFile "tableCheckinWidget")
 
-addIdent :: Entity Table -> Handler (Text, TableId, Table)
+addIdent :: Entity Table -> Handler (Text, TableId, Table, [Int])
 addIdent (Entity tableId table) = do
+  relevantSessions <- runDB $ selectList [GamingSessionTable ==. tableId] []
   identity <- newIdent
-  return (identity,  tableId, table)
+  let seats = []
+  return (identity,  tableId, table, seats)
 
 tableClickHandlerWidget :: String -> TableId -> PlayerId -> Maybe Int ->  Widget
 tableClickHandlerWidget elemId tableId playerId seatId = do

@@ -9,8 +9,7 @@
 
         <title>#{pageTitle pc}
         <meta name="description" content="">
-        <meta name="author" content="">
-
+        <meta name="author" content=""> 
         <meta name="viewport" content="width=device-width,initial-scale=1">
 
         ^{pageHead pc}
@@ -22,10 +21,15 @@
         <script>
           document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/,'js');
     <body>
-        <div id="container">
-            <div id="main" role="main">
-              ^{pageBody pc}
-            <footer>
+        <div .navbar>
+            <div .navbar-inner>
+                <div .container-fluid>
+                    <ul .nav>
+                        <li><a .btn .btn-navbar href=@{PlayerListR}>Players
+                        <li><a .btn .btn-navbar href=@{TablesR}>Tables
+                        <li><a .btn .btn-navbar href=@{GamingSessionsR}>Open Sessions</a>
+        <div .container-fluid>
+            ^{pageBody pc}
 
         $maybe analytics <- extraAnalytics $ appExtra $ settings master
             <script>

@@ -19,6 +19,7 @@ import Helpers.Models
 import qualified Data.Map as Map
 import Data.List as List hiding (insert)
 import Debug.Trace
+import Handler.Meta
 
 postGamingSessionsR :: Handler RepHtml
 postGamingSessionsR = do

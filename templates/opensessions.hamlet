@@ -1,30 +1,21 @@
-<form action=@{GamingSessionsR} method=post>
-    <p>
-        player
-        <input type=text name=player value=4f6150251c21230c78000000>
-        table
-        <input type=text name=table value=4f651bfa1c21231873000000>
-        table
-        <input type=text name=seat value=2>
-        <input type=submit value="make">
-<div .content>
-  <div .page-header>
-    <h1>Who is where?
+<div .page-header>
+  <h1>Who is where?
 
-  $if null records
-    <div .no-results>
-      <h3>Hmm..
-      <p> looks like no one is signed in :-/
+$if null records
+  <div .no-results>
+    <h3>Hmm..
+    <p> looks like no one is signed in :-/
 
-  $else
-    <table .bordered-table .condensed-table .zebra-striped>
-      <thead>
-        <tr>
-          <th>Playher name
-          <th>Table name
-      <tbody .link>
+$else
+  <table .bordered-table .condensed-table .zebra-striped>
+    <thead>
+      <tr>
+        <th>Playher name
+        <th>Table name
+    <tbody .link>
 
-        $forall (s,p,t) <- records
-          ^{gamingSessionWidget (entityKey s) (entityVal p) (entityVal t)}
-          
-    ^{tableMetaWidget takenSeats}
+      $forall (s,p,t) <- records
+        ^{gamingSessionWidget (entityKey s) (entityVal p) (entityVal t)}
+        
+  ^{tableMetaWidget takenSeats}
+^{checkinWidget}
