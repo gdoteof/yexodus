@@ -5,20 +5,26 @@ module Handler.Meta(
 import Import
 import Helpers.Models
 import Data.Maybe
+import Data.List (sort)
 
 type MetaTable         = Entity Table
 type MetaGamingSession = Entity GamingSession
 type MetaPlayer        = Entity Player
 
-data PlayerSlot         = Empty | PlayerSlot MetaPlayer MetaGamingSession deriving (Show, Eq)
+data PlayerSlot         = Empty | PlayerSlot { playerSlotPlayer :: MetaPlayer
+                                             , playerSlotSession :: MetaGamingSession 
+                                             } deriving (Show, Eq)
 
-data GamingTable        = GamingTable { table       :: MetaTable
+instance Ord PlayerSlot where
+        (PlayerSlot _ s1) `compare` (PlayerSlot _ s2) = 
+                (fromJust $ gamingSessionSeat $ entityVal s1) `compare` (fromJust $ gamingSessionSeat$ entityVal s2)
+
+data GamingTable        = GamingTable { gamingTableTable       :: MetaTable
                                       , playerSlots :: [PlayerSlot]
                                       } deriving (Show)
 
 data SeatingArrangement = SeatingArrangement [GamingTable] deriving (Show)
                           
- 
 getSeatingArrangement :: Handler SeatingArrangement
 getSeatingArrangement = do
         tables <- runDB $ selectList [] [Desc TableName]
@@ -29,18 +35,29 @@ getGamingTable :: MetaTable -> Handler GamingTable
 getGamingTable table = do
         sessions    <- runDB $ selectList [GamingSessionTable ==. entityKey table, GamingSessionEnd ==. Nothing] []
         playerSlots <- mapM getPlayerSlot sessions
-        let emptyTable = take 10 $ repeat Empty
-        liftIO $ putStrLn $ show emptyTable
-        return $ GamingTable table []
+        let seatedTable = reverse $ fillEmpties (tableSeats $ entityVal table) $ sort playerSlots
+        -- liftIO $ putStrLn $ show seatedTable
+        return $ GamingTable table seatedTable
 
 getPlayerSlot :: MetaGamingSession -> Handler PlayerSlot
 getPlayerSlot session =  do
         let pid = gamingSessionPlayer (entityVal session)
         mplayer <- runDB $ get pid
         case mplayer of
-            Nothing     -> return Empty
+            Nothing     -> return Empty --should be catching exception here
             Just player -> return $ PlayerSlot (Entity pid player) session
         
+slotSeat :: PlayerSlot -> Maybe Int
+slotSeat a = case a of
+                  Empty -> Nothing
+                  PlayerSlot _ s -> gamingSessionSeat $ entityVal s 
+
+fillEmpties :: Int -> [PlayerSlot] -> [PlayerSlot]
+fillEmpties 0 _ = []
+fillEmpties n [] = take n $ repeat Empty
+fillEmpties n slots@(s:ss) = if fromJust (slotSeat s) == n
+                  then s : fillEmpties (n-1) ss
+                  else Empty : fillEmpties (n-1) slots
 
 checkinWidget :: Widget
 checkinWidget = do
