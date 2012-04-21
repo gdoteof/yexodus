@@ -11,11 +11,12 @@ type MetaGamingSession = Entity GamingSession
 type MetaPlayer        = Entity Player
 
 data PlayerSlot         = Empty | PlayerSlot MetaPlayer MetaGamingSession deriving (Show, Eq)
-data SeatingArrangement = SeatingArrangement [GamingTable] deriving (Show)
 
 data GamingTable        = GamingTable { table       :: MetaTable
                                       , playerSlots :: [PlayerSlot]
                                       } deriving (Show)
+
+data SeatingArrangement = SeatingArrangement [GamingTable] deriving (Show)
                           
  
 getSeatingArrangement :: Handler SeatingArrangement
@@ -34,10 +35,11 @@ getGamingTable table = do
 
 getPlayerSlot :: MetaGamingSession -> Handler PlayerSlot
 getPlayerSlot session =  do
-        player <- runDB $ get $ gamingSessionPlayer (entityVal session)
-        case player of
+        let pid = gamingSessionPlayer (entityVal session)
+        mplayer <- runDB $ get pid
+        case mplayer of
             Nothing     -> return Empty
-            Just player -> return $ PlayerSlot (entityVal player)  session
+            Just player -> return $ PlayerSlot (Entity pid player) session
         
 
 checkinWidget :: Widget
