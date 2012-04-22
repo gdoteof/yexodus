@@ -12,7 +12,9 @@ import Import
 import Yesod.Form.Nic (YesodNic, nicHtmlField)
 import Data.Maybe
 import Handler.Table
+import Handler.Meta
 import Helpers.Models
+import Data.Text (unpack)
 
 playerForm :: Form Player
 playerForm = renderDivs $ Player
@@ -48,8 +50,9 @@ postPlayerListR = do
 
 getPlayerR :: PlayerId -> Handler RepHtml
 getPlayerR playerId = do
+     liftIO $ putStrLn $ unpack $ toPathPiece $ playerId
+     playerSession <- runDB $ selectFirst [GamingSessionPlayer ==. playerId, GamingSessionEnd ==. Nothing] [] 
      player <- runDB (get404 playerId)
      let minutes =  playerMinutes player
      defaultLayout $ do 
-                   setTitle "Testing" 
                    $(widgetFile "player")

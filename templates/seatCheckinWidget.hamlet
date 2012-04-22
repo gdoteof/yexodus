@@ -1,0 +1,1 @@
+<li ##{elemId} .seat-check-in>Checkin for slot #{seatNumber}

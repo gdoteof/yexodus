@@ -1,4 +1,7 @@
-^{tableCheckinWidget playerId}
 <h1> #{playerName player}
 <h3> #{playerNick player}
 <h3> MInutes: #{minutes}
+$if isNothing playerSession
+  ^{checkinWidget playerId}
+$else
+  <div .session-info>Signed in
