@@ -1,0 +1,8 @@
+<div>Well there is a widget..
+$forall gamingTable <- tables
+    <div>#{tableName $ entityVal $ gamingTableTable gamingTable}
+    $forall (seatNumber, slot) <- (withSeatNumbers 1 (playerSlots gamingTable))
+          $if (isEmpty slot)
+            ^{seatCheckinWidget (gamingTableTable gamingTable) (playerId) (seatNumber)}
+          $else
+            <li .someone-here>Someone is in this slot!

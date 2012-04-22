@@ -18,4 +18,3 @@ $else
         ^{gamingSessionWidget (entityKey s) (entityVal p) (entityVal t)}
         
   ^{tableMetaWidget takenSeats}
-^{checkinWidget}
