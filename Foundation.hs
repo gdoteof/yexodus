@@ -34,6 +34,7 @@ import Text.Hamlet (hamletFile)
 import Data.Text
 import Data.Int
 import Data.Time.Clock (getCurrentTime)
+import Data.Aeson
 import Yesod.Form.Nic (YesodNic, nicHtmlField)
 
 #if DEVELOPMENT
@@ -170,3 +171,25 @@ instance RenderMessage App FormMessage where
 -- wiki:
 --
 -- https://github.com/yesodweb/yesod/wiki/Sending-email
+
+playerAutoCompleteWidget :: GWidget sub App ()
+playerAutoCompleteWidget = do
+        addScriptRemote "/static/js/jquery-1.7.2.min.js"
+        addScriptRemote "/static/js/bootstrap-typeahead.js"
+        players <- lift $ runDB $ selectList [] [Desc PlayerName]
+        let playersJSON = toJSON $ Prelude.map (\player -> Data.Aeson.object ["label".=(label player),"value".=(toPathPiece (entityKey player))]) players
+        toWidget[julius| 
+                var playerAutoCompleteData = #{playersJSON};
+                $(function() {
+                    $('#player-search').typeahead({
+                        source: playerAutoCompleteData,
+                        matchProp: 'label',
+                        sortProp: 'label',
+                        valueProp: 'value',
+                        itemSelected: function(item,val,text) {
+                                document.location="/player/" + val;
+                        }
+                    })
+                })
+        |]
+        where label player = (playerNick (entityVal player)) `append` (pack " | ") `append` (playerName (entityVal player))

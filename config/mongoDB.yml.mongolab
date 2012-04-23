@@ -1,0 +1,31 @@
+Default: &defaults
+  user: exodus
+  password: pEczVfhf3CzKskQCCRHVYZcy
+  host: zzz.com
+  port: 29317
+  database: exodus
+  poolsize: 10
+
+Development:
+  <<: *defaults
+
+Testing:
+  database: Exodus_test
+  <<: *defaults
+
+Staging:
+  user: exodus
+  password: pEczVfhf3CzKskQCCRHVYZcy
+  host: ds029317.mongolab.com
+  port: 29317
+  database: exodus
+  poolsize: 10
+ 
+Production:
+  user: exodus
+  password: pEczVfhf3CzKskQCCRHVYZcy
+  host: ds029317.mongolab.com
+  port: 29317
+  database: exodus
+  poolsize: 10
+  

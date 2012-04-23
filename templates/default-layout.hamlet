@@ -1,6 +1,6 @@
-
 $maybe msg <- mmsg
     <div #message>#{msg}
 ^{widget}
+^{playerAutoCompleteWidget}
 <footer>
     #{extraCopyright $ appExtra $ settings master}

@@ -1,0 +1,4 @@
+<li ##{elemId} .seat-check-in>
+        <a .btn href="#">
+                <i .icon-minus>
+                #{playerName'}
