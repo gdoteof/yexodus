@@ -28,6 +28,9 @@
                         <li><a .btn .btn-navbar href=@{PlayerListR}>Players
                         <li><a .btn .btn-navbar href=@{TablesR}>Tables
                         <li><a .btn .btn-navbar href=@{GamingSessionsR}>Open Sessions</a>
+                        <li><a .btn .btn-navbar href=@{ReportR}>Report</a>
+                    <form .navbar-search>
+                        <input type="text" #player-search class="input-medium search-query" placeholder="Player Name">
         <div .container-fluid>
             ^{pageBody pc}
 

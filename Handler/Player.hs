@@ -56,3 +56,4 @@ getPlayerR playerId = do
      let minutes =  playerMinutes player
      defaultLayout $ do 
                    $(widgetFile "player")
+

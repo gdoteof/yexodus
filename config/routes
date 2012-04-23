@@ -15,3 +15,5 @@
 /session GamingSessionsR GET POST
 /session/#GamingSessionId GamingSessionR GET POST
 /session/#GamingSessionId/close GamingSessionCloseR POST
+
+/report ReportR GET

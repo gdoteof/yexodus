@@ -27,6 +27,7 @@ import Handler.Table
 import Handler.GamingSession
 import Helpers.Models
 import Handler.Meta
+import Handler.Report
 import System.Directory
 
 
