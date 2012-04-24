@@ -112,6 +112,7 @@ executable         Exodus
                  , aeson
                  , containers
                  , old-locale
+                 , mime-mail
 
                  , yesod-test
 test-suite integration-tests

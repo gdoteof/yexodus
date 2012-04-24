@@ -1,9 +1,9 @@
 Default: &defaults
-  user: heroku
-  password: herokupass
-  host: ds033047.mongolab.com
-  port: 33047
-  database: heroku_app4217373
+  user: Exodus
+  password: Exodus
+  host: localhost
+  port: 27017
+  database: Exodus
   poolsize: 1
 
 Development:
