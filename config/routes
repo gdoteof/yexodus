@@ -8,6 +8,7 @@
 
 /player PlayerListR GET POST
 /player/#PlayerId PlayerR GET
+/player/#PlayerId/edit PlayerEditR GET
 
 /table TablesR GET POST
 /table/#TableId TableR GET

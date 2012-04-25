@@ -1,1 +1,3 @@
-<li ##{elemId} .seat-check-in>Checkin for slot #{seatNumber}
+<li ##{elemId} .seat-check-in>
+        <a href="#" .btn >
+                Sit at Seat ##{seatNumber}

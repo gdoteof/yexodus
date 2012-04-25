@@ -1,5 +1,7 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Handler.Player
     ( getPlayerListR
+    , getPlayerEditR
     , postPlayerListR
     , getPlayerR
     )
@@ -14,7 +16,7 @@ import Data.Maybe
 import Handler.Table
 import Handler.Meta
 import Helpers.Models
-import Data.Text (unpack)
+import Data.Text (unpack,pack)
 
 playerForm :: Form Player
 playerForm = renderDivs $ Player
@@ -25,6 +27,17 @@ playerForm = renderDivs $ Player
     <*> aopt   textareaField "Notes" Nothing
     <*> areq   intField "Minutes to Start" (Just 0)
     <*> pure   False
+
+playerFormDefaults :: Player -> Form Player
+playerFormDefaults player = renderDivs $ Player
+    <$> areq   textField "Name" (Just $ playerName player)
+    <*> areq   textField "Nick" Nothing
+    <*> aopt   textField "Email" Nothing
+    <*> aopt   textField "Phone" Nothing
+    <*> aopt   textareaField "Notes" Nothing
+    <*> pure   0
+    <*> pure   False
+
 
 getPlayerListR :: Handler RepHtml
 getPlayerListR = do
@@ -48,12 +61,31 @@ postPlayerListR = do
                 $(widgetFile "playerAddError")
 
 
+getPlayerEditR :: PlayerId -> Handler RepHtml
+getPlayerEditR playerId = undefined
+        
+
 getPlayerR :: PlayerId -> Handler RepHtml
 getPlayerR playerId = do
-     liftIO $ putStrLn $ unpack $ toPathPiece $ playerId
-     playerSession <- runDB $ selectFirst [GamingSessionPlayer ==. playerId, GamingSessionEnd ==. Nothing] [] 
+     mplayerSession <- runDB $ selectFirst [GamingSessionPlayer ==. playerId, GamingSessionEnd ==. Nothing] [] 
      player <- runDB (get404 playerId)
+     (playerWidgetDefaults, enctype) <- generateFormPost (playerFormDefaults player)
      let minutes =  playerMinutes player
+     let notes   = case playerNote player of
+                        Nothing -> Textarea "No notes"
+                        Just n -> n
+     table :: Text <- case mplayerSession of
+                           Nothing -> do
+                                          return $ pack "Not checked into a table" -- should add warning here.
+                           Just s  -> do
+                                          t <- runDB $ get $ gamingSessionTable $ entityVal  s 
+                                          return  (tableName $ fromJust t)
+     
      defaultLayout $ do 
                    $(widgetFile "player")
-
+   {-where table = case mplayerSession of
+                        Nothing -> undefined
+                        Just s  -> do
+                               t <- runDB $ get (gamingSessionTable $ entityVal s) 
+                               return undefined -- (tableName $ fromJust t)
+   -}
