@@ -1,0 +1,4 @@
+    <form method=post enctype=#{enctype}>
+      ^{playerEditWidget}
+      <div>
+          <input type=submit value="Save">
