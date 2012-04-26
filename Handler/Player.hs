@@ -28,15 +28,6 @@ playerForm = renderDivs $ Player
     <*> areq   intField "Minutes to Start" (Just 0)
     <*> pure   False
 
-playerFormDefaults :: Player -> Form Player
-playerFormDefaults player = renderDivs $ Player
-    <$> areq   textField "Name" (Just $ playerName player)
-    <*> areq   textField "Nick" Nothing
-    <*> aopt   textField "Email" Nothing
-    <*> aopt   textField "Phone" Nothing
-    <*> aopt   textareaField "Notes" Nothing
-    <*> pure   0
-    <*> pure   False
 
 
 getPlayerListR :: Handler RepHtml
@@ -61,9 +52,22 @@ postPlayerListR = do
                 $(widgetFile "playerAddError")
 
 
+playerFormDefaults :: Player -> Form Player
+playerFormDefaults player = renderDivs $ Player
+    <$> areq   textField "Name" (Just $ playerName player)
+    <*> areq   textField "Nick" (Just $ playerNick player)
+    <*> aopt   textField "Email" (Just $ playerEmail player)
+    <*> aopt   textField "Phone" (Just $ playerPhone player)
+    <*> aopt   textareaField "Notes" (Just $ playerNote player)
+    <*> pure   0
+    <*> pure   False
+
 getPlayerEditR :: PlayerId -> Handler RepHtml
-getPlayerEditR playerId = undefined
-        
+getPlayerEditR playerId = do
+        player <- runDB $ get404 playerId
+        (playerEditWidget, enctype) <- generateFormPost $ playerFormDefaults player
+        defaultLayout $ do
+                $(widgetFile "player-edit")
 
 getPlayerR :: PlayerId -> Handler RepHtml
 getPlayerR playerId = do
