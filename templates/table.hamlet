@@ -1,1 +1,8 @@
-<h1> #{tableName table}
+<div .row>
+        <div .span12>
+                <div .well>
+                        <h1> #{tableName table}
+                        <small>
+                                <a href="@{TableEditR tableId}"> Edit
+<div .row>
+

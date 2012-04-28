@@ -2,6 +2,7 @@
 module Handler.Table
     ( getTablesR
     , postTablesR , getTableR
+    , postTableEditR , getTableEditR
     , tableCheckinWidget
     )
 where
@@ -13,7 +14,7 @@ import Data.Text.Lazy.Builder (Builder, fromText, toLazyText, fromLazyText)
 import Text.Julius
 import Data.Maybe
 import Database.Persist.Store
-import Debug.Trace
+import Debug.Trace 
 import qualified Data.Text as T hiding (null)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
@@ -26,6 +27,13 @@ tableForm = renderDivs $ Table
     <*> areq   intField      "Number of Seats"  (Just 9)
     <*> aopt   textField     "Description"      Nothing
 
+tableFormDefaults :: Table -> Form Table
+tableFormDefaults table = renderDivs $ Table
+    <$> areq   textField     "Name"             (Just $ tableName table)
+    <*> areq   textField     "Game"             (Just $ tableGame table)
+    <*> pure   0 --points per hour
+    <*> areq   intField      "Number of Seats"  (Just $ tableSeats table)
+    <*> aopt   textField     "Description"      Nothing
 
 getTablesR :: Handler RepHtml
 getTablesR = do
@@ -56,6 +64,26 @@ getTableR tableId = do
                    setTitle ( "Tables")
                    $(widgetFile "table")
 
+getTableEditR :: TableId ->  Handler RepHtml
+getTableEditR tableId = do
+     table <- runDB (get404 tableId)
+     (tableEditWidget, enctype) <- generateFormPost $ tableFormDefaults table
+     defaultLayout $ do 
+                   setTitle ( "Tables")
+                   $(widgetFile "table-edit")
+
+postTableEditR :: TableId -> Handler RepHtml
+postTableEditR tableId = do
+    table <- runDB $ get404 tableId
+    ((res,tableWidget),enctype) <- runFormPost $ tableFormDefaults table
+    case res of 
+         FormSuccess table -> do 
+            runDB $ replace tableId table
+            setMessage $ toHtml $ (tableName table) `mappend` " updated"
+            redirect $ TableR tableId 
+         _ -> defaultLayout $ do
+                setTitle "Please correct your entry form"
+                $(widgetFile "tableAddError")
 
 tableCheckinWidget :: PlayerId -> Widget
 tableCheckinWidget playerId= do

@@ -1,8 +1,9 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Handler.Player
     ( getPlayerListR
-    , getPlayerEditR
     , postPlayerListR
+    , getPlayerEditR
+    , postPlayerEditR
     , getPlayerR
     )
 where
@@ -25,7 +26,7 @@ playerForm = renderDivs $ Player
     <*> aopt   textField "Email" Nothing
     <*> aopt   textField "Phone" Nothing
     <*> aopt   textareaField "Notes" Nothing
-    <*> areq   intField "Minutes to Start" (Just 0)
+    <*> pure   0
     <*> pure   False
 
 
@@ -59,7 +60,7 @@ playerFormDefaults player = renderDivs $ Player
     <*> aopt   textField "Email" (Just $ playerEmail player)
     <*> aopt   textField "Phone" (Just $ playerPhone player)
     <*> aopt   textareaField "Notes" (Just $ playerNote player)
-    <*> pure   0
+    <*> pure   (playerMinutes player)
     <*> pure   False
 
 getPlayerEditR :: PlayerId -> Handler RepHtml
@@ -68,6 +69,19 @@ getPlayerEditR playerId = do
         (playerEditWidget, enctype) <- generateFormPost $ playerFormDefaults player
         defaultLayout $ do
                 $(widgetFile "player-edit")
+
+postPlayerEditR :: PlayerId -> Handler RepHtml
+postPlayerEditR playerId = do
+    player <- runDB $ get404 playerId
+    ((res,playerWidget),enctype) <- runFormPost $ playerFormDefaults player
+    case res of 
+         FormSuccess player -> do 
+            runDB $ replace playerId $ player
+            setMessage $ toHtml $ (playerName player) `mappend` " edited"
+            redirect $ PlayerR playerId 
+         _ -> defaultLayout $ do
+                setTitle "Please correct your entry form"
+                $(widgetFile "playerAddError")
 
 getPlayerR :: PlayerId -> Handler RepHtml
 getPlayerR playerId = do

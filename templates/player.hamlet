@@ -1,17 +1,8 @@
 <div .row-fluid>
         <div .span12>
                 <h1> #{playerName player}
-                <small>#{playerNick player}
-                <a class="btn" data-show=false data-toggle="modal" href="#playerEditModal" >Edit
-                <div .modal .hide data-show="false" id="playerEditModal">
-                  <div class="modal-header">
-                    <a class="close" data-dismiss="modal">×
-                    <h3>Edit Player
-                  <div class="modal-body">
-                     ^{playerWidgetDefaults}
-                  <div class="modal-footer">
-                    <a href="#" class="btn">Close</a>
-                    <a href="#" class="btn btn-primary">Save changes</a>
+                <small>#{playerNick player} 
+                        <a href="@{PlayerEditR playerId}" >(Edit)
 <div .row>
         $if isNothing mplayerSession
           ^{checkinWidget playerId}
