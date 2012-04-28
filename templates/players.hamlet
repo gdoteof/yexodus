@@ -1,3 +1,9 @@
+<h1>Add Player
+<hr>
+    <form method=post enctype=#{enctype}>
+      ^{playerWidget}
+      <div>
+          <input type=submit value="Save new player">
 <hr>
 $if null players
     <p> There are no players
@@ -6,9 +12,3 @@ $else
         $forall Entity playerId player <- players
             <li> 
                 <a href=@{PlayerR playerId} > #{playerName player}
-<h1>Players
-<hr>
-    <form method=post enctype=#{enctype}>
-      ^{playerWidget}
-      <div>
-          <input type=submit value="Creat new player">

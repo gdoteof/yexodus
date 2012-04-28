@@ -1,0 +1,3 @@
+<form method=post enctype=#{enctype}>
+        ^{tableEditWidget}
+        <input type=submit value="Save">
