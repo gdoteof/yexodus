@@ -1,0 +1,11 @@
+<div>
+    <form method=post enctype=#{enctype}>
+      ^{accountWidget}
+      <div>
+          <input type=submit value="Save">
+
+<div>
+    <form method=post enctype=#{enctype} action=@{AccountAddUserR accountId} >
+      ^{accountAddUserWidget}
+      <div>
+          <input type=submit value="Add User to Account">

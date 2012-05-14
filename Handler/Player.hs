@@ -13,14 +13,15 @@ import Import
 
 -- to use Html into forms
 import Yesod.Form.Nic (YesodNic, nicHtmlField)
+import Yesod.Auth
 import Data.Maybe
 import Handler.Table
 import Handler.Meta
 import Helpers.Models
 import Data.Text (unpack,pack)
 
-playerForm :: Form Player
-playerForm = renderDivs $ Player
+playerForm :: Entity User -> Form Player
+playerForm user = renderDivs $ Player
     <$> areq   textField "Name" Nothing
     <*> areq   textField "Nick" Nothing
     <*> aopt   textField "Email" Nothing
@@ -28,21 +29,37 @@ playerForm = renderDivs $ Player
     <*> aopt   textareaField "Notes" Nothing
     <*> pure   0
     <*> pure   False
+    <*> pure   (fromJust $ userAccount $ entityVal user)
 
+playerFormDefaults :: Entity User -> Player -> Form Player
+playerFormDefaults user player = renderDivs $ Player
+    <$> areq   textField     "Name"  (Just $ playerName  player)
+    <*> areq   textField     "Nick"  (Just $ playerNick  player)
+    <*> aopt   textField     "Email" (Just $ playerEmail player)
+    <*> aopt   textField     "Phone" (Just $ playerPhone player)
+    <*> aopt   textareaField "Notes" (Just $ playerNote player)
+    <*> pure   (playerMinutes player)
+    <*> pure   False
+    <*> pure   (fromJust $ userAccount $ entityVal user)
 
 
 getPlayerListR :: Handler RepHtml
 getPlayerListR = do
-    players <- runDB $ selectList [] [Desc PlayerName]
-    (playerWidget, enctype) <- generateFormPost playerForm
-    defaultLayout $ do
-        setTitle "Player List"
-        $(widgetFile "players")
-
+    user <- requireAuth
+    case (userAccount $ entityVal user) of 
+        Just accountId -> do 
+            players <- runDB $ selectList [PlayerAccount ==. accountId] [Desc PlayerName]
+            (playerWidget, enctype) <- generateFormPost $ playerForm user
+            defaultLayout $ do
+                setTitle "Player List"
+                $(widgetFile "players")
+        _ -> do 
+            noAccount
 
 postPlayerListR :: Handler RepHtml
 postPlayerListR = do
-    ((res,playerWidget),enctype) <- runFormPost playerForm
+    user <- requireAuth    
+    ((res,playerWidget),enctype) <- runFormPost $ playerForm user
     case res of 
          FormSuccess player -> do 
             playerId <- runDB $ insert player
@@ -53,27 +70,19 @@ postPlayerListR = do
                 $(widgetFile "playerAddError")
 
 
-playerFormDefaults :: Player -> Form Player
-playerFormDefaults player = renderDivs $ Player
-    <$> areq   textField "Name" (Just $ playerName player)
-    <*> areq   textField "Nick" (Just $ playerNick player)
-    <*> aopt   textField "Email" (Just $ playerEmail player)
-    <*> aopt   textField "Phone" (Just $ playerPhone player)
-    <*> aopt   textareaField "Notes" (Just $ playerNote player)
-    <*> pure   (playerMinutes player)
-    <*> pure   False
-
 getPlayerEditR :: PlayerId -> Handler RepHtml
 getPlayerEditR playerId = do
+        user <- requireAuth
         player <- runDB $ get404 playerId
-        (playerEditWidget, enctype) <- generateFormPost $ playerFormDefaults player
+        (playerEditWidget, enctype) <- generateFormPost $ playerFormDefaults user player
         defaultLayout $ do
                 $(widgetFile "player-edit")
 
 postPlayerEditR :: PlayerId -> Handler RepHtml
 postPlayerEditR playerId = do
+    user <- requireAuth
     player <- runDB $ get404 playerId
-    ((res,playerWidget),enctype) <- runFormPost $ playerFormDefaults player
+    ((res,playerWidget),enctype) <- runFormPost $ playerFormDefaults user player
     case res of 
          FormSuccess player -> do 
             runDB $ replace playerId $ player
@@ -85,9 +94,10 @@ postPlayerEditR playerId = do
 
 getPlayerR :: PlayerId -> Handler RepHtml
 getPlayerR playerId = do
+     user <- requireAuth    
      mplayerSession <- runDB $ selectFirst [GamingSessionPlayer ==. playerId, GamingSessionEnd ==. Nothing] [] 
      player <- runDB (get404 playerId)
-     (playerWidgetDefaults, enctype) <- generateFormPost (playerFormDefaults player)
+     (playerWidgetDefaults, enctype) <- generateFormPost (playerFormDefaults user player)
      let minutes =  playerMinutes player
      let notes   = case playerNote player of
                         Nothing -> Textarea "No notes"
@@ -101,9 +111,3 @@ getPlayerR playerId = do
      
      defaultLayout $ do 
                    $(widgetFile "player")
-   {-where table = case mplayerSession of
-                        Nothing -> undefined
-                        Just s  -> do
-                               t <- runDB $ get (gamingSessionTable $ entityVal s) 
-                               return undefined -- (tableName $ fromJust t)
-   -}

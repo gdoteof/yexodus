@@ -39,6 +39,7 @@ library
                      Helpers.Models
                      Handler.Meta
                      Handler.Report
+                     Handler.Account
 
     ghc-options:   -Wall -threaded -O0
     cpp-options:   -DDEVELOPMENT

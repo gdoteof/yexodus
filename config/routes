@@ -18,4 +18,9 @@
 /session/#GamingSessionId GamingSessionR GET POST
 /session/#GamingSessionId/close GamingSessionCloseR POST
 
+/account AccountListR GET POST
+/account/#AccountId AccountR GET
+/account/#AccountId/edit AccountEditR GET POST
+/account/#AccountId/adduser AccountAddUserR POST
+
 /report ReportR GET
