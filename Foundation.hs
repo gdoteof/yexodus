@@ -8,6 +8,7 @@ module Foundation
     , Form
     , maybeAuth
     , requireAuth
+    , noAccount
     , module Settings
     , module Model
     ) where
@@ -36,6 +37,7 @@ import Data.Int
 import Data.Time.Clock (getCurrentTime)
 import Data.Aeson
 import Yesod.Form.Nic (YesodNic, nicHtmlField)
+import Data.Maybe (fromJust)
 
 #if DEVELOPMENT
 import qualified Data.Text.Lazy.Encoding
@@ -118,6 +120,7 @@ instance Yesod App where
     -- The page to be redirected to when authentication is required.
     authRoute _ = Just $ AuthR LoginR
 
+
     messageLogger y loc level msg =
       formatLogText (getLogger y) loc level msg >>= logMsg (getLogger y)
 
@@ -129,6 +132,24 @@ instance Yesod App where
 
     -- Place Javascript at bottom of the body tag so the rest of the page loads first
     jsLoader _ = BottomOfBody
+
+    -- Authorization 
+    isAuthorized (AccountR _) _ = isAdmin
+    isAuthorized AccountListR _ = isAdmin
+
+    isAuthorized _ _ = return Authorized
+
+
+
+isAdmin = do
+        mu <- maybeAuth
+        return $ case mu of
+                Just (Entity _ u) ->
+                        if userIsAdmin u
+                                then Authorized
+                                else Unauthorized "You aren't the admin, buddy"
+                _ -> AuthenticationRequired
+
 
 -- How to run database actions.
 instance YesodPersist App where
@@ -151,10 +172,18 @@ instance YesodAuth App where
     getAuthId creds = runDB $ do
         x <- getBy $ UniqueUser $ credsIdent creds
         case x of
-            Just (Entity uid _) -> return $ Just uid
+            Just (Entity uid _) -> do
+                return $ Just uid
             Nothing -> do
-                fmap Just $ insert $ User (credsIdent creds) Nothing
+                liftIO $ print $ credsPlugin creds
+                newId <- insert $ User  (credsIdent creds) Nothing False False Nothing
+                -- insert email
+                case (credsPlugin creds) of
+                    "browserid" -> do
+                        insert $ Email  (credsIdent creds) (Just newId) Nothing
 
+                return $ Just newId
+                    
     -- You can add other plugins like BrowserID, email or OAuth here
     authPlugins _ = [authBrowserId, authGoogleEmail]
 
@@ -165,12 +194,11 @@ instance YesodAuth App where
 instance RenderMessage App FormMessage where
     renderMessage _ _ = defaultFormMessage
 
--- Note: previous versions of the scaffolding included a deliver function to
--- send emails. Unfortunately, there are too many different options for us to
--- give a reasonable default. Instead, the information is available on the
--- wiki:
---
 -- https://github.com/yesodweb/yesod/wiki/Sending-email
+
+noAccount = do
+    setMessage "This email address is not associated with an account"
+    redirect RootR
 
 playerAutoCompleteWidget :: GWidget sub App ()
 playerAutoCompleteWidget = do

@@ -1,0 +1,14 @@
+<h1>Create Account
+<hr>
+    <form method=post enctype=#{enctype}>
+      ^{accountWidget}
+      <div>
+          <input type=submit value="Create Account">
+<hr>
+$if null accounts
+    <p> There are no accounts
+$else
+    <ul>
+        $forall Entity accountId account <- accounts
+            <li> 
+                <a href=@{AccountR accountId} > #{accountName account}

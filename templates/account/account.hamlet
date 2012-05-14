@@ -1,0 +1,4 @@
+<h1>#{accountName account}
+    <small>
+        <a href="@{AccountEditR accountId}">(Edit)
+

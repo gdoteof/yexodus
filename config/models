@@ -1,12 +1,20 @@
 User
     ident Text
     password Text Maybe
+    isAdmin Bool
+    isAccountAdmin Bool
+    account AccountId Maybe
     UniqueUser ident
+
 Email
     email Text
     user UserId Maybe
     verkey Text Maybe
     UniqueEmail email
+
+Account
+    name Text
+    UniqueAccount name
 
 Player
     name Text
@@ -16,6 +24,7 @@ Player
     note Textarea Maybe
     minutes Int 
     inSession Bool
+    account AccountId
     deriving Show Eq
 
 Table
@@ -24,6 +33,7 @@ Table
     pointsHour Int
     seats Int 
     description Text Maybe
+    account AccountId
     deriving Show Eq
 
 GamingSession

@@ -40,28 +40,23 @@ textToKey a = fromJust . fromPathPiece $ a
 
 getGamingSessionsR :: Handler RepHtml
 getGamingSessionsR = do
-  records <- runDB $ do
-      sessions <- selectList [GamingSessionEnd ==. Nothing] []
-      players  <- selectList [] []
-      tables   <- selectList [] []
+    user <- requireAuth
+    case (userAccount $ entityVal user) of 
+        Just accountId -> do 
+            records <- runDB $ do
+                sessions <- selectList [GamingSessionEnd ==. Nothing] []
+                players  <- selectList [PlayerAccount ==. accountId] []
+                tables   <- selectList [TableAccount ==. accountId] []
+                return $ joinTables3 gamingSessionPlayer gamingSessionTable sessions players tables
+            let takenSeats = tableMeta records
+            defaultLayout $(widgetFile ("opensessions"))
+        Nothing -> noAccount
 
-      return $ joinTables3 gamingSessionPlayer gamingSessionTable sessions players tables
-
-  let takenSeats = tableMeta records
-  defaultLayout $(widgetFile ("opensessions"))
 
 -- Generates a list of (Entty Table, [Int]) which represent the 'taken' seats for the 
 tableMeta :: [(Entity GamingSession, Entity Player, Entity Table)] -> [(Entity Table, [Int])]
 tableMeta [] = []
 tableMeta xs = Import.foldl addUpdate [] xs
-
-tableMetaWidget :: [(Entity Table, [Int])] -> Widget
-tableMetaWidget tuple = do
-      let availSeats = map makeArray tuple
-      $(widgetFile "tableMetaWidget") 
-      where makeArray ts@(t,ss) = (t,openSeatsArray)
-              where
-                    openSeatsArray = List.take (tableSeats (entityVal t))  (repeat 0)
 
 addUpdate :: [(Entity Table, [Int])] -> (Entity GamingSession, Entity Player, Entity Table) -> [(Entity Table, [Int])] 
 addUpdate acc (g,p,table) 
@@ -74,6 +69,15 @@ addUpdate acc (g,p,table)
      seat = case gamingSessionSeat (entityVal g) of
                     Nothing -> []
                     _ -> [fromJust $ gamingSessionSeat $ entityVal g]
+
+tableMetaWidget :: [(Entity Table, [Int])] -> Widget
+tableMetaWidget tuple = do
+      let availSeats = map makeArray tuple
+      $(widgetFile "tableMetaWidget") 
+      where makeArray ts@(t,ss) = (t,openSeatsArray)
+              where
+                    openSeatsArray = List.take (tableSeats (entityVal t))  (repeat 0)
+
 
 getGamingSessionR :: GamingSessionId -> Handler RepHtml
 getGamingSessionR gamingSessionId = do 

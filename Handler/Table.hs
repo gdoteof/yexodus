@@ -19,34 +19,41 @@ import qualified Data.Text as T hiding (null)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
 
-tableForm :: Form Table
-tableForm = renderDivs $ Table
+tableForm :: Entity User -> Form Table
+tableForm user = renderDivs $ Table
     <$> areq   textField     "Name"             Nothing
     <*> areq   textField     "Game"             (Just "NL Holdem $1/$2")
     <*> areq   intField      "Points per hour"  (Just 1)
     <*> areq   intField      "Number of Seats"  (Just 9)
     <*> aopt   textField     "Description"      Nothing
+    <*> pure   (fromJust $ userAccount $ entityVal user)
 
-tableFormDefaults :: Table -> Form Table
-tableFormDefaults table = renderDivs $ Table
+tableFormDefaults :: Entity User -> Table -> Form Table
+tableFormDefaults user table = renderDivs $ Table
     <$> areq   textField     "Name"             (Just $ tableName table)
     <*> areq   textField     "Game"             (Just $ tableGame table)
     <*> pure   0 --points per hour
     <*> areq   intField      "Number of Seats"  (Just $ tableSeats table)
     <*> aopt   textField     "Description"      Nothing
+    <*> pure   (fromJust $ userAccount $ entityVal user)
 
 getTablesR :: Handler RepHtml
 getTablesR = do
-    tables <- runDB $ selectList [] [Desc TableName]
-    (tableWidget, enctype) <- generateFormPost tableForm
-    defaultLayout $ do
-        setTitle "Tables"
-        $(widgetFile "tables")
+    user <- requireAuth
+    case (userAccount $ entityVal user) of 
+        Just accountId -> do 
+            tables <- runDB $ selectList [TableAccount ==. accountId] [Desc TableName]
+            (tableWidget, enctype) <- generateFormPost $ tableForm user
+            defaultLayout $ do
+                setTitle "Tables"
+                $(widgetFile "tables")
+        Nothing -> noAccount
 
 
 postTablesR :: Handler RepHtml
 postTablesR = do
-    ((res,tableWidget),enctype) <- runFormPost tableForm
+    user <- requireAuth
+    ((res,tableWidget),enctype) <- runFormPost $ tableForm user
     case res of 
          FormSuccess table -> do 
             tableId <- runDB $ insert table
@@ -67,7 +74,8 @@ getTableR tableId = do
 getTableEditR :: TableId ->  Handler RepHtml
 getTableEditR tableId = do
      table <- runDB (get404 tableId)
-     (tableEditWidget, enctype) <- generateFormPost $ tableFormDefaults table
+     user <- requireAuth
+     (tableEditWidget, enctype) <- generateFormPost $ tableFormDefaults user table 
      defaultLayout $ do 
                    setTitle ( "Tables")
                    $(widgetFile "table-edit")
@@ -75,7 +83,8 @@ getTableEditR tableId = do
 postTableEditR :: TableId -> Handler RepHtml
 postTableEditR tableId = do
     table <- runDB $ get404 tableId
-    ((res,tableWidget),enctype) <- runFormPost $ tableFormDefaults table
+    user <- requireAuth
+    ((res,tableWidget),enctype) <- runFormPost $ tableFormDefaults user table
     case res of 
          FormSuccess table -> do 
             runDB $ replace tableId table
