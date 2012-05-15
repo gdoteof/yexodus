@@ -4,6 +4,8 @@ module Handler.Player
     , postPlayerListR
     , getPlayerEditR
     , postPlayerEditR
+    , getPlayerEditTimeR
+    , postPlayerEditTimeR
     , getPlayerR
     )
 where
@@ -111,3 +113,31 @@ getPlayerR playerId = do
      
      defaultLayout $ do 
                    $(widgetFile "player")
+
+data TimeEdit = Add | Subtract
+    deriving (Show, Eq, Enum, Bounded)
+
+data HoursMinutes = Minutes | Hours
+    deriving (Show, Eq, Enum, Bounded)
+
+playerTimeForm ::  Form (TimeEdit, Int, HoursMinutes)
+playerTimeForm = renderDivs $ (,,)
+    <$> areq   (radioFieldList addSubtract) "" Nothing
+    <*> areq   intField "" Nothing
+    <*> areq   (radioFieldList hoursMinutes) "This many:" Nothing
+      where 
+        addSubtract :: [(Text, TimeEdit)]
+        addSubtract  = [("Add", Add), ("Subtract", Subtract)]
+        hoursMinutes :: [(Text, HoursMinutes)]
+        hoursMinutes  = [("Minutes", Minutes), ("Hours", Hours)]
+
+getPlayerEditTimeR :: PlayerId -> Handler RepHtml
+getPlayerEditTimeR playerId = do
+    player <- runDB $ get404 playerId
+    (playerEditTimeWidget, enctype) <- generateFormPost $ playerTimeForm 
+    defaultLayout $ do
+        $(widgetFile "player/player-edit-time")
+
+postPlayerEditTimeR :: PlayerId -> Handler RepHtml
+postPlayerEditTimeR  playerId = do
+    defaultLayout [whamlet|hey|]
