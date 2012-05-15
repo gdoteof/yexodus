@@ -9,6 +9,7 @@
 /player PlayerListR GET POST
 /player/#PlayerId PlayerR GET
 /player/#PlayerId/edit PlayerEditR GET POST
+/player/#PlayerId/edit/time PlayerEditTimeR GET POST
 
 /table TablesR GET POST
 /table/#TableId TableR GET

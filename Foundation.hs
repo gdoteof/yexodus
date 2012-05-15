@@ -134,8 +134,10 @@ instance Yesod App where
     jsLoader _ = BottomOfBody
 
     -- Authorization 
-    isAuthorized (AccountR _) _ = isAdmin
-    isAuthorized AccountListR _ = isAdmin
+    isAuthorized (AccountR _) _      = isAdmin
+    isAuthorized AccountListR _      = isAdmin
+
+    isAuthorized (PlayerEditTimeR _) _ = isAccountAdmin
 
     isAuthorized _ _ = return Authorized
 
@@ -147,7 +149,16 @@ isAdmin = do
                 Just (Entity _ u) ->
                         if userIsAdmin u
                                 then Authorized
-                                else Unauthorized "You aren't the admin, buddy"
+                                else Unauthorized "You are not the site admin"
+                _ -> AuthenticationRequired
+
+isAccountAdmin = do
+        mu <- maybeAuth
+        return $ case mu of
+                Just (Entity _ u) ->
+                        if userIsAccountAdmin u
+                                then Authorized
+                                else Unauthorized "You aren't an admin, buddy"
                 _ -> AuthenticationRequired
 
 
