@@ -1,7 +1,7 @@
 Default: &defaults
   host: "*4" # any IPv4 host
   port: 3000
-  copyright: copyright
+  copyright: "copyright"
   approot: "http://localhost:3000"
   #analytics: UA-YOURCODE
 
@@ -12,8 +12,11 @@ Testing:
   <<: *defaults
 
 Staging:
+  approot: "http://50.116.22.52:8080"
+  port: 8080
   <<: *defaults
 
 Production:
-  #approot: "http://www.example.com"
+  approot: "http://50.116.22.52"
+  port: 80
   <<: *defaults
