@@ -181,6 +181,8 @@ instance YesodAuth App where
                 case (credsPlugin creds) of
                     "browserid" -> do
                         insert $ Email  (credsIdent creds) (Just newId) Nothing
+                    "openid" -> do
+                        insert $ Email  (credsIdent creds) (Just newId) Nothing
 
                 return $ Just newId
                     
