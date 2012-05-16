@@ -9,6 +9,8 @@ module Foundation
     , maybeAuth
     , requireAuth
     , noAccount
+    , userIsAccountAdmin
+    , userIsAdmin
     , module Settings
     , module Model
     ) where
@@ -158,7 +160,7 @@ isAccountAdmin = do
                 Just (Entity _ u) ->
                         if userIsAccountAdmin u
                                 then Authorized
-                                else Unauthorized "You aren't an admin, buddy"
+                                else Unauthorized "You aren't the admin, buddy"
                 _ -> AuthenticationRequired
 
 
