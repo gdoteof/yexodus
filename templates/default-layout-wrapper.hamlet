@@ -29,6 +29,9 @@
                         <li><a .btn .btn-navbar href=@{TablesR}>Tables
                         <li><a .btn .btn-navbar href=@{GamingSessionsR}>Open Sessions</a>
                         <li><a .btn .btn-navbar href=@{ReportR}>Report</a>
+                        $if not $ isNothing maccountId
+                            $if userIsAccountAdmin (entityVal $ fromJust muser)
+                                <li><a .btn .btn-navbar href=@{AccountR (fromJust(fromJust maccountId))}>Admin</a>
                     <form .navbar-search>
                         <input type="text" #player-search class="input-medium search-query" placeholder="Player Name">
         <div .container-fluid>
