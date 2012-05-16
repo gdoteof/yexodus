@@ -21,6 +21,8 @@ import Handler.Table
 import Handler.Meta
 import Helpers.Models
 import Data.Text (unpack,pack)
+import Database.Persist.Query.Internal
+import Numeric
 
 playerForm :: Entity User -> Form Player
 playerForm user = renderDivs $ Player
@@ -114,30 +116,45 @@ getPlayerR playerId = do
      defaultLayout $ do 
                    $(widgetFile "player")
 
-data TimeEdit = Add | Subtract
+data AddSubtract = Addition | Subtraction
     deriving (Show, Eq, Enum, Bounded)
 
 data HoursMinutes = Minutes | Hours
     deriving (Show, Eq, Enum, Bounded)
 
-playerTimeForm ::  Form (TimeEdit, Int, HoursMinutes)
+playerTimeForm ::  Form (AddSubtract, Int, HoursMinutes)
 playerTimeForm = renderDivs $ (,,)
-    <$> areq   (radioFieldList addSubtract) "" Nothing
-    <*> areq   intField "" Nothing
-    <*> areq   (radioFieldList hoursMinutes) "This many:" Nothing
+    <$> areq   (radioFieldList addSubtract) "" (Just Addition)
+    <*> areq   intField "This many:" (Just 0)
+    <*> areq   (radioFieldList hoursMinutes) "" (Just Minutes)
       where 
-        addSubtract :: [(Text, TimeEdit)]
-        addSubtract  = [("Add", Add), ("Subtract", Subtract)]
+        addSubtract :: [(Text, AddSubtract)]
+        addSubtract  = [("Add", Addition), ("Subtract", Subtraction)]
         hoursMinutes :: [(Text, HoursMinutes)]
         hoursMinutes  = [("Minutes", Minutes), ("Hours", Hours)]
 
 getPlayerEditTimeR :: PlayerId -> Handler RepHtml
 getPlayerEditTimeR playerId = do
     player <- runDB $ get404 playerId
+    let hours = showFFloat (Just 3) (fromRational (( toRational $ playerMinutes player) / 60)) ""
     (playerEditTimeWidget, enctype) <- generateFormPost $ playerTimeForm 
     defaultLayout $ do
+        setTitle "Editing time" 
         $(widgetFile "player/player-edit-time")
 
 postPlayerEditTimeR :: PlayerId -> Handler RepHtml
 postPlayerEditTimeR  playerId = do
-    defaultLayout [whamlet|hey|]
+    player <- runDB $ get404 playerId
+    ((res,playerEditTimeWidget),enctype) <- runFormPost $ playerTimeForm
+    case res of 
+         FormSuccess (addSubtract, time, hoursMinutes) -> do 
+            let minutes = case hoursMinutes of
+                      Hours -> time * 60
+                      Minutes -> time
+            let op = case addSubtract of
+                      Addition    -> (+=.)
+                      Subtraction -> (-=.)
+            runDB $ update playerId [PlayerMinutes `op` minutes]
+            setMessage $ toHtml $ (playerName player) `mappend` " created"
+            redirect $ PlayerR playerId 
+         _ -> redirect $ PlayerEditR playerId 
