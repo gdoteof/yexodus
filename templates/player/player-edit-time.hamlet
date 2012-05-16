@@ -1,0 +1,12 @@
+<div .row>
+    <div .span3>
+        <h1>
+            #{playerName player}
+        <div>
+            Current accumulated time is #{hours} hours
+    <div .span3>
+        <div>
+            <form method=post enctype=#{enctype}>
+              ^{playerEditTimeWidget}
+              <div>
+                  <input type=submit value="Save">

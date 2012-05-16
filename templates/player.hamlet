@@ -2,7 +2,10 @@
         <div .span12>
                 <h1> #{playerName player}
                 <small>#{playerNick player} 
-                        <a href="@{PlayerEditR playerId}" >(Edit)
+                    <a href="@{PlayerEditR playerId}" >(Edit)
+        $if userIsAccountAdmin (entityVal user)
+                <small>
+                    <a href="@{PlayerEditTimeR playerId}" >(Modify Time)
 <div .row>
         $if isNothing mplayerSession
           ^{checkinWidget playerId}
