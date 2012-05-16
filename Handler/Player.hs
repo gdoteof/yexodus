@@ -136,6 +136,7 @@ playerTimeForm = renderDivs $ (,,)
 getPlayerEditTimeR :: PlayerId -> Handler RepHtml
 getPlayerEditTimeR playerId = do
     player <- runDB $ get404 playerId
+    user <- requireAuth
     let hours = showFFloat (Just 3) (fromRational (( toRational $ playerMinutes player) / 60)) ""
     (playerEditTimeWidget, enctype) <- generateFormPost $ playerTimeForm 
     defaultLayout $ do
