@@ -4,6 +4,7 @@ module Handler.Table
     , postTablesR , getTableR
     , postTableEditR , getTableEditR
     , tableCheckinWidget
+    , tableMeta
     )
 where
 
@@ -18,6 +19,7 @@ import Debug.Trace
 import qualified Data.Text as T hiding (null)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
+import Data.List as List hiding (insert)
 
 tableForm :: Entity User -> Form Table
 tableForm user = renderDivs $ Table
@@ -66,8 +68,13 @@ postTablesR = do
 
 getTableR :: TableId ->  Handler RepHtml
 getTableR tableId = do
-     table <- runDB (get404 tableId)
-     defaultLayout $ do 
+    table <- runDB (get404 tableId)
+    user <- requireAuth
+    records  <- runDB $ do
+        sessions <- selectList [GamingSessionTable ==. tableId, GamingSessionEnd ==. Nothing] []
+        players  <- selectList [] []
+        return $ joinTables gamingSessionPlayer sessions players
+    defaultLayout $ do 
                    setTitle ( "Tables")
                    $(widgetFile "table")
 
@@ -129,3 +136,19 @@ tableClickHandlerWidget elemId tableId playerId seatId = do
         });
       |]
 
+-- Generates a list of (Entty Table, [Int]) which represent the 'taken' seats for the 
+tableMeta :: [(Entity GamingSession, Entity Player, Entity Table)] -> [(Entity Table, [Int])]
+tableMeta [] = []
+tableMeta xs = Import.foldl addUpdate [] xs
+    where 
+        addUpdate :: [(Entity Table, [Int])] -> (Entity GamingSession, Entity Player, Entity Table) -> [(Entity Table, [Int])] 
+        addUpdate acc (g,p,table) 
+           --If this is the first entry for a table add it to acc
+           | List.filter (\(t,is) -> entityKey t == entityKey table) acc == []    = [(table, seat)] ++ acc
+           --update the table in acc
+           | otherwise = map update acc
+           where 
+             update ts@(t,s) | t==table = (t, List.sort(s++seat)) | otherwise = ts
+             seat = case gamingSessionSeat (entityVal g) of
+                Nothing -> []
+                _ -> [fromJust $ gamingSessionSeat $ entityVal g]

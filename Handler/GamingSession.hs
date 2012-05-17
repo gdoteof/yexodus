@@ -5,6 +5,7 @@ module Handler.GamingSession
     , getGamingSessionR
     , postGamingSessionR
     , postGamingSessionCloseR
+    , tableMetaWidget
     )
 where
 
@@ -20,6 +21,7 @@ import qualified Data.Map as Map
 import Data.List as List hiding (insert)
 import Debug.Trace
 import Handler.Meta
+import Handler.Table
 
 postGamingSessionsR :: Handler RepHtml
 postGamingSessionsR = do
@@ -53,22 +55,6 @@ getGamingSessionsR = do
         Nothing -> noAccount
 
 
--- Generates a list of (Entty Table, [Int]) which represent the 'taken' seats for the 
-tableMeta :: [(Entity GamingSession, Entity Player, Entity Table)] -> [(Entity Table, [Int])]
-tableMeta [] = []
-tableMeta xs = Import.foldl addUpdate [] xs
-
-addUpdate :: [(Entity Table, [Int])] -> (Entity GamingSession, Entity Player, Entity Table) -> [(Entity Table, [Int])] 
-addUpdate acc (g,p,table) 
-   --If this is the first entry for a table add it to acc
-   | List.filter (\(t,is) -> entityKey t == entityKey table) acc == []    = [(table, seat)] ++ acc
-   --update the table in acc
-   | otherwise = map update acc
-   where 
-     update ts@(t,s) | t==table = (t, List.sort(s++seat)) | otherwise = ts
-     seat = case gamingSessionSeat (entityVal g) of
-                    Nothing -> []
-                    _ -> [fromJust $ gamingSessionSeat $ entityVal g]
 
 tableMetaWidget :: [(Entity Table, [Int])] -> Widget
 tableMetaWidget tuple = do

@@ -2,10 +2,12 @@ $forall gamingTable <- tables
            <div .span3>
                 <div .well>
                     <h3>#{tableName $ entityVal $ gamingTableTable gamingTable}
-                        <ol .nav .nav-pills .nav-stacked>
-                            $forall (seatNumber, slot) <- (withSeatNumbers 1 (playerSlots gamingTable))
-                                  $if (isEmpty slot)
-                                    ^{seatCheckinWidget (gamingTableTable gamingTable) (playerId) (seatNumber)}
-                                  $else
-                                    <li>
-                                        <a .disabled .btn href="#">Taken
+                    <div>
+                        <small>#{tableGame $ entityVal $ gamingTableTable gamingTable}
+                    <ol .nav .nav-pills .nav-stacked>
+                        $forall (seatNumber, slot) <- (withSeatNumbers 1 (playerSlots gamingTable))
+                              $if (isEmpty slot)
+                                ^{seatCheckinWidget (gamingTableTable gamingTable) (playerId) (seatNumber)}
+                              $else
+                                <li>
+                                    <a .disabled .btn href="#">Taken

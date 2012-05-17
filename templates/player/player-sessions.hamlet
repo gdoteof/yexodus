@@ -1,0 +1,15 @@
+<table>
+    <thead>
+        <tr>
+            <td>Table
+            <td>Start
+            <td>End
+            <td>Minutes
+    <tbody>
+$forall (minutes, esession, table) <- sessionMinutesTables
+         <tr>
+            <td>#{tableName table}
+            <td>#{show $ gamingSessionStart $ entityVal esession}
+            $if not $ isNothing $ gamingSessionEnd $ entityVal esession
+                <td>#{show $ fromJust $ gamingSessionEnd $ entityVal esession}
+                <td>#{minutes}

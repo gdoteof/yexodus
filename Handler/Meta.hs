@@ -1,11 +1,13 @@
 module Handler.Meta(checkinWidget
                    ,checkoutWidget
+                   ,minutesToHours
                    ) where
 
 import Import
 import Helpers.Models
 import Data.Maybe
 import Data.List (sort)
+import Numeric
 
 type MetaTable         = Entity Table
 type MetaGamingSession = Entity GamingSession
@@ -138,3 +140,5 @@ isEmpty Empty = True
 isEmpty _ = False
 
 externalJquery = "http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
+
+minutesToHours precision minutes = showFFloat (Just precision) (fromRational ((toRational minutes) / 60)) ""
