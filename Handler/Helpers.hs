@@ -2,12 +2,14 @@ module Helpers.Model
     ( findOrCreate
     , joinTables
     , joinTables3
+    , prettyTime
     ) where
 
 import Prelude
 import Yesod
 import Data.Maybe (catMaybes)
 import qualified Data.Map as M
+
 
 findOrCreate :: ( YesodPersistBackend m ~ PersistEntityBackend v
                 , YesodPersist m
@@ -30,9 +32,7 @@ joinTables3 :: (a -> Key (PersistEntityBackend b) b)
             -> [Entity c]
             -> [(Entity a, Entity b, Entity c)]
 joinTables3 f g as bs cs = catMaybes . for as $ \a ->
-    case (lookupRelation f a bs, lookupRelation g a cs) of
-        (Just b, Just c) -> Just (a,b,c)
-        _                -> Nothing
+    case (lookupRelation f a bs, lookupRelation g a cs) of (Just b, Just c) -> Just (a,b,c) _                -> Nothing
 
 lookupRelation :: (a -> Key (PersistEntityBackend b) b) -> Entity a -> [Entity b] -> Maybe (Entity b)
 lookupRelation f a bs = let k  = f $ entityVal a
@@ -41,3 +41,5 @@ lookupRelation f a bs = let k  = f $ entityVal a
 
 for ::  [a] -> (a -> b) -> [b]
 for xs f = map f xs
+
+

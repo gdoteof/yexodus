@@ -1,6 +1,7 @@
 module Handler.Meta(checkinWidget
                    ,checkoutWidget
                    ,minutesToHours
+                   ,prettyTime
                    ) where
 
 import Import
@@ -8,6 +9,9 @@ import Helpers.Models
 import Data.Maybe
 import Data.List (sort)
 import Numeric
+import Data.Time
+import Data.Time.Format
+import System.Locale
 
 type MetaTable         = Entity Table
 type MetaGamingSession = Entity GamingSession
@@ -142,3 +146,5 @@ isEmpty _ = False
 externalJquery = "http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
 
 minutesToHours precision minutes = showFFloat (Just precision) (fromRational ((toRational minutes) / 60)) ""
+prettyTime :: UTCTime -> String
+prettyTime utc = formatTime defaultTimeLocale "%b %d, %Y %R" $ utcToLocalTime (TimeZone (-300) False "COT") utc

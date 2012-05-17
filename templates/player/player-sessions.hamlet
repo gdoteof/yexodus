@@ -1,15 +1,21 @@
-<table>
-    <thead>
-        <tr>
-            <td>Table
-            <td>Start
-            <td>End
-            <td>Minutes
-    <tbody>
-$forall (minutes, esession, table) <- sessionMinutesTables
-         <tr>
-            <td>#{tableName table}
-            <td>#{show $ gamingSessionStart $ entityVal esession}
-            $if not $ isNothing $ gamingSessionEnd $ entityVal esession
-                <td>#{show $ fromJust $ gamingSessionEnd $ entityVal esession}
-                <td>#{minutes}
+<div .row>
+    <div .span12>
+        Session information for #{playerName player}
+<div .row-fluid>
+    <div .span12>
+        <div .well>
+            <table .table>
+                <thead>
+                    <tr>
+                        <td>Table
+                        <td>Start
+                        <td>End
+                        <td>Minutes
+                <tbody>
+                $forall (minutes, esession, table) <- sessionMinutesTables
+                     <tr>
+                        <td>#{tableName table}
+                        <td>#{prettyTime $ gamingSessionStart $ entityVal esession}
+                        $if not $ isNothing $ gamingSessionEnd $ entityVal esession
+                            <td>#{prettyTime $ fromJust $ gamingSessionEnd $ entityVal esession}
+                            <td>#{minutes}

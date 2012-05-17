@@ -3,9 +3,10 @@
                 <h1> #{playerName player}
                 <small>#{playerNick player} 
                     <a href="@{PlayerEditR playerId}" >(Edit)
-        $if userIsAccountAdmin (entityVal user)
-                <small>
-                    <a href="@{PlayerEditTimeR playerId}" >(Modify Time)
+                $if userIsAccountAdmin (entityVal user)
+                    <small>
+                        <a href="@{PlayerEditTimeR playerId}" >(Modify Time)
+
 <div .row>
         $if isNothing mplayerSession
           ^{checkinWidget playerId}
@@ -18,6 +19,8 @@
                 #{minutes} minutes 
                 <div>
                     <small>(#{hours} hours)
+                <div>
+                    <a href="@{PlayerSessionsR playerId}" >Session Information
                 <h3>Player notes
                 #{notes}
 
