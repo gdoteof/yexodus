@@ -166,7 +166,7 @@ postPlayerEditTimeR  playerId = do
 getPlayerSessionsR :: PlayerId -> Handler RepHtml
 getPlayerSessionsR playerId = do
     player <- runDB $ get404 playerId
-    sessions <- runDB $ selectList [GamingSessionPlayer ==. playerId] []
+    sessions <- runDB $ selectList [GamingSessionPlayer ==. playerId] [Desc GamingSessionStart]
     sessionMinutesTables <- mapM withMinutesTable sessions 
     defaultLayout $ do
         $(widgetFile "player/player-sessions")
