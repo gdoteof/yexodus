@@ -1,8 +1,15 @@
 <div .row>
-        <div .span12>
-                <div .well>
-                        <h1> #{tableName table}
-                        <small>
-                                <a href="@{TableEditR tableId}"> Edit
-<div .row>
-
+    <div .span3>
+        <div .well>
+            <h1> #{tableName table}
+            <small>
+                    <a href="@{TableEditR tableId}"> Edit
+            <div> #{tableGame table}
+    <div .span4>
+        <div .well>
+            $if null records
+                <div>#{tableSeats table} empty seats
+            $else
+                <ul>
+                $forall (session,player) <- records
+                    <li>##{fromJust $ gamingSessionSeat $ entityVal session}: #{playerName $ entityVal player}

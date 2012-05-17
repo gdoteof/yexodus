@@ -7,6 +7,7 @@ module Handler.Player
     , getPlayerEditTimeR
     , postPlayerEditTimeR
     , getPlayerR
+    , getPlayerSessionsR
     )
 where
 
@@ -22,6 +23,7 @@ import Handler.Meta
 import Helpers.Models
 import Data.Text (unpack,pack)
 import Database.Persist.Query.Internal
+import Data.Time.Clock
 import Numeric
 
 playerForm :: Entity User -> Form Player
@@ -104,8 +106,9 @@ getPlayerR playerId = do
      (playerWidgetDefaults, enctype) <- generateFormPost (playerFormDefaults user player)
      let minutes =  playerMinutes player
      let notes   = case playerNote player of
-                        Nothing -> Textarea "No notes"
                         Just n -> n
+                        Nothing -> Textarea "No notes"
+     let hours = minutesToHours 3 $ playerMinutes player
      table :: Text <- case mplayerSession of
                            Nothing -> do
                                           return $ pack "Not checked into a table" -- should add warning here.
@@ -159,3 +162,17 @@ postPlayerEditTimeR  playerId = do
             setMessage $ toHtml $ (playerName player) `mappend` " created"
             redirect $ PlayerR playerId 
          _ -> redirect $ PlayerEditR playerId 
+
+getPlayerSessionsR :: PlayerId -> Handler RepHtml
+getPlayerSessionsR playerId = do
+    player <- runDB $ get404 playerId
+    sessions <- runDB $ selectList [GamingSessionPlayer ==. playerId] []
+    sessionMinutesTables <- mapM withMinutesTable sessions 
+    defaultLayout $ do
+        $(widgetFile "player/player-sessions")
+    where 
+        withMinutesTable :: Entity GamingSession -> Handler (Int, Entity GamingSession, Table)
+        withMinutesTable es@(Entity _ session) = do
+            let minutes = fromIntegral(round((diffUTCTime (fromJust $ gamingSessionEnd session) (gamingSessionStart session)) / 60))
+            table <- runDB $ get $ gamingSessionTable session
+            return (minutes, es, (fromJust table))

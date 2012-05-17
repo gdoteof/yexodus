@@ -14,8 +14,10 @@
                 <div>Signed in to #{table}
 
         <div .span3>
-                <h3> Minutes Played: 
-                #{minutes}
+                <h3> Accumulated Time: 
+                #{minutes} minutes 
+                <div>
+                    <small>(#{hours} hours)
                 <h3>Player notes
                 #{notes}
 
