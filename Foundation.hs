@@ -142,7 +142,7 @@ instance Yesod App where
     jsLoader _ = BottomOfBody
 
     -- Authorization 
-    isAuthorized (AccountR _) _      = isAdmin
+    isAuthorized (AccountR _) _      = isAccountAdmin
     isAuthorized AccountListR _      = isAdmin
 
     isAuthorized (PlayerEditTimeR _) _ = isAccountAdmin
