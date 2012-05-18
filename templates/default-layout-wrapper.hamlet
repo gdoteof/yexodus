@@ -24,16 +24,22 @@
         <div .navbar>
             <div .navbar-inner>
                 <div .container-fluid>
-                    <ul .nav>
-                        <li><a .btn .btn-navbar href=@{PlayerListR}>Players
-                        <li><a .btn .btn-navbar href=@{TablesR}>Tables
-                        <li><a .btn .btn-navbar href=@{GamingSessionsR}>Open Sessions</a>
-                        <li><a .btn .btn-navbar href=@{ReportR}>Report</a>
-                        $if not $ isNothing maccountId
-                            $if userIsAccountAdmin (entityVal $ fromJust muser)
-                                <li><a .btn .btn-navbar href=@{AccountR (fromJust(fromJust maccountId))}>Admin</a>
-                    <form .navbar-search>
-                        <input type="text" #player-search class="input-medium search-query" placeholder="Player Name">
+                    <a .btn .btn-navbar data-toggle="collapse" data-target=".nav-collapse">
+                        <span .icon-bar>
+                        <span .icon-bar>
+                        <span .icon-bar>
+                    <a .brand>Exodus
+                    <form .navbar-search .pull-right>
+                        <input type="text" #player-search .input-medium .search-query placeholder="Player Name">
+                    <div .nav-collapse>
+                        <ul .nav>
+                            <li><a  href=@{PlayerListR}>Players
+                            <li><a  href=@{TablesR}>Tables
+                            <li><a  href=@{GamingSessionsR}>Open Sessions</a>
+                            <li><a  href=@{ReportR}>Report</a>
+                            $if not $ isNothing maccountId
+                                $if userIsAccountAdmin (entityVal $ fromJust muser)
+                                    <li><a .btn .btn-navbar href=@{AccountR (fromJust(fromJust maccountId))}>Admin</a>
         <div .container-fluid>
             ^{pageBody pc}
 
