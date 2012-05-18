@@ -51,7 +51,16 @@ accountFormDefaults eaccount = renderDivs $ Account
     <$> areq   textField "Name" (Just $ accountName $ entityVal $ eaccount)
 
 postAccountEditR :: AccountId -> Handler RepHtml
-postAccountEditR = undefined
+postAccountEditR accountId = do
+        account <- runDB $ get404 accountId
+        ((res,accountWidget), enctype) <- runFormPost $ accountFormDefaults $ Entity accountId account
+        case res of
+            FormSuccess account -> do 
+                runDB $ update accountId [AccountName =. (accountName account)]
+                redirect $ AccountR accountId
+
+            _ -> redirect $ AccountEditR accountId
+
 
 accountAddUserForm :: AccountId -> Form (Text, AccountId)
 accountAddUserForm accountId = renderDivs $ (,)
