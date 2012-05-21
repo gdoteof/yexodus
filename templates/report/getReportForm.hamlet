@@ -1,0 +1,4 @@
+<form method=post enctype=#{enctype}>
+  ^{reportFormWidget}
+  <div>
+      <input type=submit value="Save">
