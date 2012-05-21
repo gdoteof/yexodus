@@ -32,6 +32,7 @@ postGamingSessionsR = do
                 <$> (textToKey <$> (ireq textField "player"))
                 <*> (textToKey <$> (ireq textField "table"))
                 <*> iopt intField "seat"
+                <*> pure 0
     gsId <- runDB $ insert gs
     let startTime = formatTime defaultTimeLocale "%H:%M:%S (%b/%e/%y)" (gamingSessionStart gs)
     player <- runDB (get404 (gamingSessionPlayer gs))
@@ -83,12 +84,13 @@ postGamingSessionCloseR sid= do
     end <- liftIO $ getCurrentTime
     let minutes = fromIntegral ( round ( (diffUTCTime end (gamingSessionStart session)) / 60))
     let pph = tablePointsHour table --points per hour
+    let points = (fromIntegral minutes / 60) * pph
     runDB $ do
-        update  sid [GamingSessionEnd =. Just end]
+        update  sid [GamingSessionEnd =. Just end, GamingSessionPoints =. points]
         update (gamingSessionPlayer session) [PlayerMinutes +=. minutes]
         update (gamingSessionPlayer session) [PlayerMinutesTotal +=. minutes]
-        update (gamingSessionPlayer session) [PlayerPoints +=.  (fromIntegral minutes / 60) * pph]
-        update (gamingSessionPlayer session) [PlayerPointsTotal +=.  (fromIntegral minutes / 60) * pph]
+        update (gamingSessionPlayer session) [PlayerPoints +=.  points]
+        update (gamingSessionPlayer session) [PlayerPointsTotal +=.  points]
     defaultLayout [whamlet|Session closed!|]
         
         

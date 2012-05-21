@@ -4,8 +4,6 @@
                 <h2>Seated Players
 <div .row>
         $forall gamingTable <- tables
-            <div .span2>
-                <div .row>
                     <div .span2>
                         <h3>#{tableName $ entityVal $ gamingTableTable gamingTable}
                         <ol .nav .nav-pills .nav-stacked>
