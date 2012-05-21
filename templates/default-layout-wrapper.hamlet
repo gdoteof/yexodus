@@ -33,10 +33,10 @@
                         <input type="text" #player-search .input-medium .search-query placeholder="Player Name">
                     <div .nav-collapse>
                         <ul .nav>
-                            <li><a  href=@{PlayerListR}>Players
+                            <li><a  href=@{PlayerListR}>Add Player
                             <li><a  href=@{TablesR}>Tables
                             <li><a  href=@{GamingSessionsR}>Open Sessions</a>
-                            <li><a  href=@{ReportR}>Report</a>
+                            <li><a  href=@{Top100R}>Report</a>
                             $if not $ isNothing maccountId
                                 $if userIsAccountAdmin (entityVal $ fromJust muser)
                                     <li><a .btn .btn-navbar href=@{AccountR (fromJust(fromJust maccountId))}>Admin</a>
