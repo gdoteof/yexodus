@@ -25,4 +25,5 @@
 /account/#AccountId/edit AccountEditR GET POST
 /account/#AccountId/adduser AccountAddUserR POST
 
-/report ReportR GET
+/top100 Top100R GET
+/report ReportFormR GET

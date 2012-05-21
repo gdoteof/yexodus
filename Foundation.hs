@@ -24,6 +24,7 @@ import Yesod.Auth.GoogleEmail
 import Yesod.Default.Config
 import Yesod.Default.Util (addStaticContentExternal)
 import Yesod.Logger (Logger, logMsg, formatLogText)
+import Yesod.Form.Jquery
 import Network.HTTP.Conduit (Manager)
 import qualified Settings
 import qualified Database.Persist.Store
@@ -86,6 +87,8 @@ mkMessage "App" "messages" "en"
 mkYesodData "App" $(parseRoutesFile "config/routes")
 
 type Form x = Html -> MForm App App (FormResult x, Widget)
+
+instance YesodJquery App
 
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.

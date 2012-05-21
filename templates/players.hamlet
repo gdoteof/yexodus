@@ -4,11 +4,3 @@
       ^{playerWidget}
       <div>
           <input type=submit value="Save new player">
-<hr>
-$if null players
-    <p> There are no players
-$else
-    <ul>
-        $forall Entity playerId player <- players
-            <li> 
-                <a href=@{PlayerR playerId} > #{playerName player}

@@ -54,7 +54,7 @@ getPlayerListR = do
     user <- requireAuth
     case (userAccount $ entityVal user) of 
         Just accountId -> do 
-            players <- runDB $ selectList [PlayerAccount ==. accountId] [Desc PlayerName]
+            -- players <- runDB $ selectList [PlayerAccount ==. accountId] [Desc PlayerName]
             (playerWidget, enctype) <- generateFormPost $ playerForm user
             defaultLayout $ do
                 setTitle "Player List"

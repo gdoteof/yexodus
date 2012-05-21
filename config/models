@@ -16,6 +16,10 @@ Account
     name Text
     UniqueAccount name
 
+Report
+    account   AccountId
+    csv  FilePath
+
 Player
     name Text
     nick Text

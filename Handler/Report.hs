@@ -1,14 +1,43 @@
-module Handler.Report(getReportR) where
+module Handler.Report( getTop100R
+       , getReportFormR
+        ,) where
 
 import Import
 import Handler.Meta
+import Data.Time.Clock
+import Data.Time (Day)
+import Data.Maybe (fromJust)
+import Yesod.Form.Jquery
 
-getReportR :: Handler RepHtml
-getReportR = do
+type EndDay = Day
+type StartDay = Day
+type NumPlayers = Maybe Int
+
+data ReportSubmission = ReportSubmission StartDay EndDay NumPlayers
+
+
+reportForm :: AccountId -> Form ReportSubmission
+reportForm accountId = renderDivs $ ReportSubmission
+    <$> areq  (jqueryDayField def { jdsChangeYear = True
+        , jdsYearRange = "-1:0" 
+        }) "Start" Nothing
+    <*> areq  (jqueryDayField def
+        { jdsChangeYear = True
+        , jdsYearRange = "-1:0" 
+        }) "End" Nothing
+    <*> aopt intField "How many" (Just (Just 0)) --This seems weird
+
+getTop100R :: Handler RepHtml
+getTop100R = do
         report <- runDB $ selectList [] [Desc PlayerMinutes, LimitTo 100]
-        defaultLayout $(widgetFile "Report")
+        defaultLayout $(widgetFile "report/top100")
 
-withSeatNumbers :: Int -> [Entity Player] -> [(Int,Entity Player)]
-withSeatNumbers _ [] = []
-withSeatNumbers startAt (s:ss) = (startAt, s) : withSeatNumbers (startAt+1) ss
+withNumbers :: Int -> [Entity Player] -> [(Int,Entity Player)]
+withNumbers _ [] = []
+withNumbers startAt (s:ss) = (startAt, s) : withNumbers (startAt+1) ss
 
+getReportFormR :: Handler RepHtml
+getReportFormR = do
+    user <- requireAuth
+    (reportFormWidget,enctype) <- generateFormPost $ reportForm (fromJust $ userAccount $ entityVal user)
+    defaultLayout $(widgetFile "report/getReportForm")
