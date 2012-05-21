@@ -6,6 +6,8 @@ module Handler.Player
     , postPlayerEditR
     , getPlayerEditTimeR
     , postPlayerEditTimeR
+    , getPlayerEditPointsR
+    , postPlayerEditPointsR
     , getPlayerR
     , getPlayerSessionsR
     )
@@ -33,9 +35,12 @@ playerForm user = renderDivs $ Player
     <*> aopt   textField "Email" Nothing
     <*> aopt   textField "Phone" Nothing
     <*> aopt   textareaField "Notes" Nothing
-    <*> pure   0
-    <*> pure   False
+    <*> pure   0 --minutes
+    <*> pure   0 --minutes total
+    <*> pure   False --in session
     <*> pure   (fromJust $ userAccount $ entityVal user)
+    <*> pure   0 --points
+    <*> pure   0 --points total
 
 playerFormDefaults :: Entity User -> Player -> Form Player
 playerFormDefaults user player = renderDivs $ Player
@@ -44,9 +49,12 @@ playerFormDefaults user player = renderDivs $ Player
     <*> aopt   textField     "Email" (Just $ playerEmail player)
     <*> aopt   textField     "Phone" (Just $ playerPhone player)
     <*> aopt   textareaField "Notes" (Just $ playerNote player)
-    <*> pure   (playerMinutes player)
-    <*> pure   False
+    <*> pure   (playerMinutes player) --minutes
+    <*> pure   (playerMinutesTotal player) --minutes total
+    <*> pure   (playerInSession player) --in session
     <*> pure   (fromJust $ userAccount $ entityVal user)
+    <*> pure   (playerPoints player)
+    <*> pure   (playerPointsTotal player)
 
 
 getPlayerListR :: Handler RepHtml
@@ -176,3 +184,38 @@ getPlayerSessionsR playerId = do
             let minutes = fromIntegral(round((diffUTCTime (fromJust $ gamingSessionEnd session) (gamingSessionStart session)) / 60))
             table <- runDB $ get $ gamingSessionTable session
             return (minutes, es, (fromJust table))
+
+type Points = Double
+
+playerPointsForm ::  Form (AddSubtract, Points)
+playerPointsForm = renderDivs $ (,)
+    <$> areq   (radioFieldList addSubtract) "" (Just Addition)
+    <*> areq   doubleField "This many points:" (Just 0.0)
+      where 
+        addSubtract :: [(Text, AddSubtract)]
+        addSubtract  = [("Add", Addition), ("Subtract", Subtraction)]
+
+getPlayerEditPointsR :: PlayerId -> Handler RepHtml
+getPlayerEditPointsR playerId = do
+    player <- runDB $ get404 playerId
+    user <- requireAuth
+    (playerEditPointsWidget, enctype) <- generateFormPost $ playerPointsForm 
+    defaultLayout $ do
+        setTitle "Editing points" 
+        $(widgetFile "player/player-edit-points")
+
+postPlayerEditPointsR :: PlayerId -> Handler RepHtml
+postPlayerEditPointsR  playerId = do
+    player <- runDB $ get404 playerId
+    ((res,playerEditPointsWidget),enctype) <- runFormPost $ playerPointsForm
+    case res of 
+         FormSuccess (addSubtract, points) -> do 
+            let op = case addSubtract of
+                      Addition    -> (+=.)
+                      Subtraction -> (-=.)
+            runDB $ do
+                update playerId [PlayerPoints `op` points]
+                update playerId [PlayerPointsTotal `op` points]
+            setMessage $ toHtml $ (playerName player) `mappend` " points updated"
+            redirect $ PlayerR playerId 
+         _ -> redirect $ PlayerEditR playerId 

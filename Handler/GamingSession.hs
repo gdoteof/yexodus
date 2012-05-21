@@ -77,12 +77,21 @@ postGamingSessionR gamingSessionId = do
 
 postGamingSessionCloseR :: GamingSessionId -> Handler RepHtml
 postGamingSessionCloseR sid= do
-    session <- runDB (get404 sid)
-    person <- runDB (get404 $ gamingSessionPlayer session)
+    session <- runDB $ get404 sid
+    person  <- runDB $ get404 $ gamingSessionPlayer session
+    table   <- runDB $ get404 $ gamingSessionTable session
     end <- liftIO $ getCurrentTime
-    runDB $ update  sid [GamingSessionEnd =. Just end]
-    runDB $ update (gamingSessionPlayer session) [PlayerMinutes +=. fromIntegral ( round ( (diffUTCTime end (gamingSessionStart session)) / 60))]
+    let minutes = fromIntegral ( round ( (diffUTCTime end (gamingSessionStart session)) / 60))
+    let pph = tablePointsHour table --points per hour
+    runDB $ do
+        update  sid [GamingSessionEnd =. Just end]
+        update (gamingSessionPlayer session) [PlayerMinutes +=. minutes]
+        update (gamingSessionPlayer session) [PlayerMinutesTotal +=. minutes]
+        update (gamingSessionPlayer session) [PlayerPoints +=.  (fromIntegral minutes / 60) * pph]
+        update (gamingSessionPlayer session) [PlayerPointsTotal +=.  (fromIntegral minutes / 60) * pph]
     defaultLayout [whamlet|Session closed!|]
+        
+        
 
 gamingSessionWidget :: GamingSessionId -> Player -> Table -> Widget
 gamingSessionWidget sid p t = do

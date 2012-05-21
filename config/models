@@ -27,14 +27,17 @@ Player
     phone Text Maybe
     note Textarea Maybe
     minutes Int 
+    minutesTotal Int 
     inSession Bool
     account AccountId
+    points Double
+    pointsTotal Double
     deriving Show Eq
 
 Table
     name Text
     game Text 
-    pointsHour Int
+    pointsHour Double
     seats Int 
     description Text Maybe
     account AccountId

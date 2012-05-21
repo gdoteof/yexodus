@@ -1,0 +1,14 @@
+<div .row>
+    <div .span3>
+        <h1>
+            #{playerName player}
+        <div>
+            Current  #{playerPoints player} 
+        <div>
+            Lifetime  #{playerPointsTotal player} 
+    <div .span3>
+        <div>
+            <form method=post enctype=#{enctype}>
+              ^{playerEditPointsWidget}
+              <div>
+                  <input type=submit value="Save">

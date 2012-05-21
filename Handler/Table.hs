@@ -25,7 +25,7 @@ tableForm :: Entity User -> Form Table
 tableForm user = renderDivs $ Table
     <$> areq   textField     "Name"             Nothing
     <*> areq   textField     "Game"             (Just "NL Holdem $1/$2")
-    <*> areq   intField      "Points per hour"  (Just 1)
+    <*> areq   doubleField   "Points per hour"  (Just 1)
     <*> areq   intField      "Number of Seats"  (Just 9)
     <*> aopt   textField     "Description"      Nothing
     <*> pure   (fromJust $ userAccount $ entityVal user)
@@ -34,7 +34,7 @@ tableFormDefaults :: Entity User -> Table -> Form Table
 tableFormDefaults user table = renderDivs $ Table
     <$> areq   textField     "Name"             (Just $ tableName table)
     <*> areq   textField     "Game"             (Just $ tableGame table)
-    <*> pure   0 --points per hour
+    <*> areq   doubleField   "Points per hour"  (Just 1)
     <*> areq   intField      "Number of Seats"  (Just $ tableSeats table)
     <*> aopt   textField     "Description"      Nothing
     <*> pure   (fromJust $ userAccount $ entityVal user)

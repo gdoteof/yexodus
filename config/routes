@@ -10,6 +10,7 @@
 /player/#PlayerId PlayerR GET
 /player/#PlayerId/edit PlayerEditR GET POST
 /player/#PlayerId/edit/time PlayerEditTimeR GET POST
+/player/#PlayerId/edit/points PlayerEditPointsR GET POST
 /player/#PlayerId/sessions PlayerSessionsR GET
 
 /table TablesR GET POST
