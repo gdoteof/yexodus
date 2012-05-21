@@ -8,7 +8,7 @@
                         <th>Player
                         <th>Time
                 <tbody>
-                    $forall (seatNumber,player) <- withSeatNumbers 1 report
+                    $forall (seatNumber,player) <- withNumbers 1 report
                         <tr>
                             <td>#{seatNumber}
                             <td>#{playerName $ entityVal player}
