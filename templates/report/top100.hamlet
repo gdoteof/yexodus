@@ -1,0 +1,16 @@
+<div .row-fluid>
+    <div .span12>
+        <div .well>
+            <table .table>
+                <thead>
+                    <tr>
+                        <th>
+                        <th>Player
+                        <th>Time
+                <tbody>
+                    $forall (seatNumber,player) <- withSeatNumbers 1 report
+                        <tr>
+                            <td>#{seatNumber}
+                            <td>#{playerName $ entityVal player}
+                            <td>#{playerMinutes $ entityVal player}
+                                <small>(#{minutesToHours  3 $ playerMinutes $ entityVal player} hours)
