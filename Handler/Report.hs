@@ -32,7 +32,7 @@ getTop100R = do
     user <- requireAuth
     case (userAccount $ entityVal user) of 
         Just accountId -> do 
-            report <- runDB $ selectList [] [Desc PlayerMinutes, LimitTo 100]
+            report <- runDB $ selectList [PlayerAccount ==. accountId] [Desc PlayerMinutes, LimitTo 100]
             defaultLayout $(widgetFile "report/top100")
         _ -> do 
             noAccount
