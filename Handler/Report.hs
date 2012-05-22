@@ -29,8 +29,13 @@ reportForm accountId = renderDivs $ ReportSubmission
 
 getTop100R :: Handler RepHtml
 getTop100R = do
-        report <- runDB $ selectList [] [Desc PlayerMinutes, LimitTo 100]
-        defaultLayout $(widgetFile "report/top100")
+    user <- requireAuth
+    case (userAccount $ entityVal user) of 
+        Just accountId -> do 
+            report <- runDB $ selectList [] [Desc PlayerMinutes, LimitTo 100]
+            defaultLayout $(widgetFile "report/top100")
+        _ -> do 
+            noAccount
 
 withNumbers :: Int -> [Entity Player] -> [(Int,Entity Player)]
 withNumbers _ [] = []
