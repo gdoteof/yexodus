@@ -227,6 +227,9 @@ noAccount = do
 playerAutoCompleteWidget :: GWidget sub App ()
 playerAutoCompleteWidget = do
         addScriptRemote "/static/js/jquery-1.7.2.min.js"
+        addScriptRemote "/static/js/jquery.ui.datepicker.js"
+        addScriptRemote "/static/js/jquery.ui.core.js"
+        addScriptRemote "/static/js/bootstrap-typeahead.js"
         addScriptRemote "/static/js/bootstrap-typeahead.js"
         addScriptRemote "/static/js/bootstrap-modal.js"
         addScriptRemote "/static/js/bootstrap-dropdown.js"
