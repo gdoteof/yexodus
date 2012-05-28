@@ -1,0 +1,10 @@
+<div .row>
+    <div .span3>
+        <div>
+            Start: #{show startUTC}
+        <div>
+            End: #{show endDay}
+        <div>
+            Num: #{show numPlayers}
+        <div>
+            Account: #{accountName $ fromJust account}
