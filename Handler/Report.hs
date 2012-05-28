@@ -5,6 +5,7 @@ module Handler.Report( getTop100R
 
 import Import
 import Handler.Meta
+import Helpers.Models
 import Data.Time.Clock
 import Data.Time (Day)
 import Data.Time.LocalTime
@@ -51,13 +52,17 @@ postReportFormR = do
     account <- case (userAccount $ entityVal user) of 
         Just accountId -> do 
             runDB $ get accountId
-        _              -> noAccount -- 
+        _              -> noAccount -- redirect user on no account
     ((res,reportFormWidget),enctype) <- runFormPost $ reportForm (fromJust $ userAccount $ entityVal user)
     case res of
         FormSuccess (ReportSubmission startDay endDay numPlayers) ->
             defaultLayout $ do
                 let startUTC = localTimeToUTC (accountTimeZone account) $ LocalTime startDay midnight
                 let endUTC   = localTimeToUTC (accountTimeZone account) $ LocalTime endDay   midnight
+                report <- lift $ runDB $ do
+                    sessions <- selectList [GamingSessionStart >=. startUTC, GamingSessionEnd <=. Just endUTC] [Desc GamingSessionStart]
+                    players  <- selectList [PlayerAccount ==. (fromJust $ userAccount $ entityVal user)] []
+                    return $ joinTables gamingSessionPlayer sessions players
                 $(widgetFile "report/postReportForm")
         _ -> do
             setMessage "Form Failure"
