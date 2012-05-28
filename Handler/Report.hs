@@ -1,11 +1,13 @@
 module Handler.Report( getTop100R
        , getReportFormR
-        ,) where
+       , postReportFormR
+       ) where
 
 import Import
 import Handler.Meta
 import Data.Time.Clock
 import Data.Time (Day)
+import Data.Time.LocalTime
 import Data.Maybe (fromJust)
 import Yesod.Form.Jquery
 
@@ -17,15 +19,10 @@ data ReportSubmission = ReportSubmission StartDay EndDay NumPlayers
 
 
 reportForm :: AccountId -> Form ReportSubmission
-reportForm accountId = renderDivs $ ReportSubmission
-    <$> areq  (jqueryDayField def { jdsChangeYear = True
-        , jdsYearRange = "-1:0" 
-        }) "Start" Nothing
-    <*> areq  (jqueryDayField def
-        { jdsChangeYear = True
-        , jdsYearRange = "-1:0" 
-        }) "End" Nothing
-    <*> aopt intField "How many" (Just (Just 0)) --This seems weird
+reportForm accountId = renderDivs $ ReportSubmission <$>
+        areq  (jqueryDayField (JqueryDaySettings True True "c-5:now" (Left 1))) "Start" Nothing -- (my settings for "at least 18 years old but not older than 80")
+    <*> areq  (jqueryDayField (JqueryDaySettings True True "c-5:now" (Left 1))) "End"   Nothing -- (my settings for "at least 18 years old but not older than 80")
+    <*> aopt intField "How many (leave blank for all)" Nothing 
 
 getTop100R :: Handler RepHtml
 getTop100R = do
@@ -45,4 +42,23 @@ getReportFormR :: Handler RepHtml
 getReportFormR = do
     user <- requireAuth
     (reportFormWidget,enctype) <- generateFormPost $ reportForm (fromJust $ userAccount $ entityVal user)
-    defaultLayout $(widgetFile "report/getReportForm")
+    defaultLayout $ do
+        $(widgetFile "report/getReportForm")
+
+postReportFormR :: Handler RepHtml
+postReportFormR = do
+    user <- requireAuth
+    account <- case (userAccount $ entityVal user) of 
+        Just accountId -> do 
+            runDB $ get accountId
+        _              -> noAccount -- 
+    ((res,reportFormWidget),enctype) <- runFormPost $ reportForm (fromJust $ userAccount $ entityVal user)
+    case res of
+        FormSuccess (ReportSubmission startDay endDay numPlayers) ->
+            defaultLayout $ do
+                let startUTC = localTimeToUTC (accountTimeZone account) $ LocalTime startDay midnight
+                let endUTC   = localTimeToUTC (accountTimeZone account) $ LocalTime endDay   midnight
+                $(widgetFile "report/postReportForm")
+        _ -> do
+            setMessage "Form Failure"
+            redirect ReportFormR
