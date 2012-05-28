@@ -1,4 +1,7 @@
-<form method=post enctype=#{enctype}>
-  ^{reportFormWidget}
-  <div>
-      <input type=submit value="Save">
+<div .row>
+    <div .span3>
+        <div>
+            <form method=post enctype=#{enctype}>
+              ^{reportFormWidget}
+              <div>
+                  <input type=submit value="Run Report">
