@@ -27,4 +27,4 @@
 /account/#AccountId/adduser AccountAddUserR POST
 
 /top100 Top100R GET
-/report ReportFormR GET
+/report ReportFormR GET POST
