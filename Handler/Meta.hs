@@ -2,6 +2,7 @@ module Handler.Meta(checkinWidget
                    ,checkoutWidget
                    ,minutesToHours
                    ,prettyTime
+                   ,accountTimeZone
                    ) where
 
 import Import
@@ -148,3 +149,7 @@ externalJquery = "http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.j
 minutesToHours precision minutes = showFFloat (Just precision) (fromRational ((toRational minutes) / 60)) ""
 prettyTime :: UTCTime -> String
 prettyTime utc = formatTime defaultTimeLocale "%b %d, %Y %R" $ utcToLocalTime (TimeZone (-300) False "COT") utc
+
+
+accountTimeZone _ = TimeZone (-300) False "COT"
+
