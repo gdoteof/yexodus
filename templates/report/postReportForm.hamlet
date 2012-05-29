@@ -1,10 +1,18 @@
 <div .row>
     <div .span3>
         <div>
-            Start: #{show startUTC}
+            Start: #{show startUTC'}
         <div>
             End: #{show endDay}
         <div>
             Num: #{show numPlayers}
         <div>
             Account: #{accountName $ fromJust account}
+
+
+$forall (sessions, player) <- report
+    <div>
+        <div>#{playerName $ entityVal player}
+        <ul>
+        $forall session <- sessions
+            <li>#{show $ diffUTCTime  (fromJust $ gamingSessionEnd $ entityVal session) (gamingSessionStart $ entityVal session)}

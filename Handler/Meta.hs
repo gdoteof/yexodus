@@ -3,6 +3,7 @@ module Handler.Meta(checkinWidget
                    ,minutesToHours
                    ,prettyTime
                    ,accountTimeZone
+                   ,gamingSessionMinutes
                    ) where
 
 import Import
@@ -153,3 +154,7 @@ prettyTime utc = formatTime defaultTimeLocale "%b %d, %Y %R" $ utcToLocalTime (T
 
 accountTimeZone _ = TimeZone (-300) False "COT"
 
+gamingSessionMinutes :: Entity GamingSession -> Int
+gamingSessionMinutes gs 
+    | (gamingSessionEnd (entityVal $ gs) == Nothing) = 0
+    | otherwise = fromIntegral ( round ( (diffUTCTime (fromJust $ gamingSessionEnd $ entityVal gs) (gamingSessionStart $ entityVal gs)) / 60 ))
