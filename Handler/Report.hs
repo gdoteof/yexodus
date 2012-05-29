@@ -11,6 +11,64 @@ import Data.Time (Day)
 import Data.Time.LocalTime
 import Data.Maybe (fromJust)
 import Yesod.Form.Jquery
+import Text.Groom
+import Data.List (groupBy)
+import Data.Function (on)
+import Data.List (head)
+import Control.Arrow
+
+
+data PlayerReport = PlayerReport {
+     startUTC   :: UTCTime 
+   , endUTC     :: UTCTime 
+   , numPlayers :: Maybe Int
+   }
+
+
+type EarnedMinutes = Int
+type GivenMinutes = Int
+type EarnedPoints = Double
+type GivenPoints = Double
+
+type PrintablePR = [(Entity Player, [Entity GamingSession], [Entity ManualSession], EarnedMinutes, EarnedPoints, GivenMinutes, GivenPoints)]
+
+getReport :: PlayerReport -> Handler PrintablePR
+getReport pr = do 
+    user <- requireAuth
+    let userId = (fromJust $ userAccount $ entityVal user)
+    report <- runDB $ do
+        sessions   <- selectList [GamingSessionStart >=. startUTC pr , GamingSessionEnd <=. Just (endUTC pr) ] 
+                                 [Desc GamingSessionStart]
+        players    <- selectList [PlayerAccount ==. userId] []
+        manSessions <- selectList [ManualSessionAccount ==. userId] []
+        let gsPlayer = joinTables gamingSessionPlayer sessions players
+        let msPlayer = joinTables manualSessionPlayer manSessions players
+        return $ zipWith (\x y -> ( (snd x)
+                                  , (fst x)
+                                  , (fst y)
+                                  , (sumMinutes (fst x))
+                                  , (sumPoints (fst x))
+                                  , sumManMinutes (fst y)
+                                  , sumManPoints (fst y)
+                                  )) 
+                         (collapse' gsPlayer) 
+                         (collapse' msPlayer)
+    return  report
+    where collapse' l = map (map fst &&& snd.head)  $  groupBy ((==) `on` snd) l
+          sumMinutes :: [Entity GamingSession] -> Int
+          sumMinutes = sum . map gamingSessionMinutes 
+
+          sumPoints :: [Entity GamingSession] -> Double
+          sumPoints gss = sum . map (gamingSessionPoints . entityVal) $ gss
+
+          sumManMinutes :: [Entity ManualSession] -> Int
+          sumManMinutes mss = sum . map (manualSessionMinutes . entityVal) $ mss
+
+          sumManPoints :: [Entity ManualSession] -> Double
+          sumManPoints mss = sum . map (manualSessionPoints . entityVal) $ mss
+
+
+
 
 type EndDay = Day
 type StartDay = Day
@@ -57,12 +115,15 @@ postReportFormR = do
     case res of
         FormSuccess (ReportSubmission startDay endDay numPlayers) ->
             defaultLayout $ do
-                let startUTC = localTimeToUTC (accountTimeZone account) $ LocalTime startDay midnight
-                let endUTC   = localTimeToUTC (accountTimeZone account) $ LocalTime endDay   midnight
-                report <- lift $ runDB $ do
-                    sessions <- selectList [GamingSessionStart >=. startUTC, GamingSessionEnd <=. Just endUTC] [Desc GamingSessionStart]
+                let startUTC' = localTimeToUTC (accountTimeZone account) $ LocalTime startDay midnight
+                let endUTC'   = localTimeToUTC (accountTimeZone account) $ LocalTime endDay   midnight
+                dbData <- lift $ runDB $ do
+                    sessions <- selectList [GamingSessionStart >=. startUTC', GamingSessionEnd <=. Just endUTC'] [Desc GamingSessionStart]
                     players  <- selectList [PlayerAccount ==. (fromJust $ userAccount $ entityVal user)] []
                     return $ joinTables gamingSessionPlayer sessions players
+                let report = map (map fst &&& snd.head)  $  groupBy ((==) `on` snd) dbData
+                
+                liftIO $ putStrLn $ groom  $ report
                 $(widgetFile "report/postReportForm")
         _ -> do
             setMessage "Form Failure"

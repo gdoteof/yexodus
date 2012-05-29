@@ -114,6 +114,7 @@ executable         Exodus
                  , containers
                  , old-locale
                  , mime-mail
+                 , groom
 
                  , yesod-test
 test-suite integration-tests

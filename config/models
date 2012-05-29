@@ -52,5 +52,11 @@ GamingSession
     points Double 
     deriving Show Eq
 
+ManualSession
+    account AccountId
+    player PlayerId
+    minutes Int
+    points Double
+
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)
 
