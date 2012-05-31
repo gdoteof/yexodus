@@ -158,3 +158,7 @@ gamingSessionMinutes :: Entity GamingSession -> Int
 gamingSessionMinutes gs 
     | (gamingSessionEnd (entityVal $ gs) == Nothing) = 0
     | otherwise = fromIntegral ( round ( (diffUTCTime (fromJust $ gamingSessionEnd $ entityVal gs) (gamingSessionStart $ entityVal gs)) / 60 ))
+
+
+playerLink :: Entity Player -> Text
+playerLink (Entity key player) = undefined

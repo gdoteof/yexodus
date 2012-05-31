@@ -32,7 +32,7 @@ Player
     account AccountId
     points Double
     pointsTotal Double
-    deriving Show Eq
+    deriving Ord Show Eq 
 
 Table
     name Text
@@ -50,13 +50,14 @@ GamingSession
     table TableId
     seat Int Maybe
     points Double 
-    deriving Show Eq
+    deriving Show Eq Ord
 
 ManualSession
     account AccountId
     player PlayerId
     minutes Int
     points Double
-
+    created UTCTime
+    deriving Show Eq Ord
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)
 

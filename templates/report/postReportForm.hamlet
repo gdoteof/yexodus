@@ -1,18 +1,29 @@
 <div .row>
-    <div .span3>
-        <div>
-            Start: #{show startUTC'}
-        <div>
-            End: #{show endDay}
-        <div>
-            Num: #{show numPlayers}
-        <div>
-            Account: #{accountName $ fromJust account}
-
-
-$forall (sessions, player) <- report
-    <div>
-        <div>#{playerName $ entityVal player}
-        <ul>
-        $forall session <- sessions
-            <li>#{show $ diffUTCTime  (fromJust $ gamingSessionEnd $ entityVal session) (gamingSessionStart $ entityVal session)}
+    <div .span12>
+        <table .table>
+            <thead>
+                <tr>
+                    <th>Player
+                    <th># Sessions
+                    <th># Audits
+                    <th>Time Clocked
+                    <th>Points Earned
+                    <th>Time Auditing
+                    <th>Points Auditing
+                    <th>Total Time
+                    <th>Total Points
+            <tbody>
+            $forall (eplayer, esessions,eMsessions, earnedMinutes, earnedPoints, manualMinutes, manualPoints) <- report
+                <tr>
+                    <td>
+                        <span .player-name>
+                            <a href=@{PlayerR $ entityKey eplayer}>#{playerName $ entityVal eplayer}
+                    <td>#{length esessions}
+                    <td>#{length eMsessions}
+                    <td>#{earnedMinutes}
+                        <small>(#{minutesToHours  3 $ earnedMinutes} hours)
+                    <td>#{earnedPoints}
+                    <td>#{manualMinutes}
+                    <td>#{manualPoints}
+                    <td>#{(+) earnedMinutes manualMinutes}
+                    <td>#{(+) earnedPoints manualPoints}
