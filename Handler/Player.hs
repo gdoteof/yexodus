@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ScopedTypeVariables, NoMonomorphismRestriction #-}
 module Handler.Player
     ( getPlayerListR
     , postPlayerListR
@@ -133,11 +133,12 @@ data AddSubtract = Addition | Subtraction
 data HoursMinutes = Minutes | Hours
     deriving (Show, Eq, Enum, Bounded)
 
-playerTimeForm ::  Form (AddSubtract, Int, HoursMinutes)
-playerTimeForm = renderDivs $ (,,)
+playerTimeForm ::  Form (AddSubtract, Int, HoursMinutes, Double)
+playerTimeForm = renderDivs $ (,,,)
     <$> areq   (radioFieldList addSubtract) "" (Just Addition)
     <*> areq   intField "This many:" (Just 0)
     <*> areq   (radioFieldList hoursMinutes) "" (Just Minutes)
+    <*> areq   doubleField "And this many points:" (Just 0.0)
       where 
         addSubtract :: [(Text, AddSubtract)]
         addSubtract  = [("Add", Addition), ("Subtract", Subtraction)]
@@ -159,14 +160,17 @@ postPlayerEditTimeR  playerId = do
     player <- runDB $ get404 playerId
     ((res,playerEditTimeWidget),enctype) <- runFormPost $ playerTimeForm
     case res of 
-         FormSuccess (addSubtract, time, hoursMinutes) -> do 
+         FormSuccess (addSubtract, time, hoursMinutes, points) -> do  --time is number of minutes
             let minutes = case hoursMinutes of
-                      Hours -> time * 60
-                      Minutes -> time
-            let op = case addSubtract of
-                      Addition    -> (+=.)
-                      Subtraction -> (-=.)
-            runDB $ update playerId [PlayerMinutes `op` minutes]
+                  Hours -> time * 60
+                  Minutes -> time
+            let (updateOp,updateOp',insertOp, insertOp') = case addSubtract of
+                 Addition    -> ( (+=.) ,(+=.) , id    ,id)
+                 Subtraction -> ( (-=.) ,(-=.) , negate,negate)
+            runDB $ do
+                update playerId [PlayerMinutesTotal `updateOp` minutes ,PlayerMinutes `updateOp` minutes, PlayerPoints `updateOp'` points, PlayerPointsTotal `updateOp'` points]
+                now <- liftIO $ getCurrentTime
+                insert $ ManualSession (playerAccount player) playerId (insertOp minutes) (insertOp' points) now
             setMessage $ toHtml $ (playerName player) `mappend` " created"
             redirect $ PlayerR playerId 
          _ -> redirect $ PlayerEditR playerId 
