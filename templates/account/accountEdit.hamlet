@@ -1,11 +1,14 @@
-<div>
-    <form method=post enctype=#{enctype}>
-      ^{accountWidget}
-      <div>
-          <input type=submit value="Save">
+<div .row>
+    <div .span3>
+        <form method=post enctype=#{enctype}>
+          ^{accountWidget}
+          <div>
+              <input type=submit value="Save">
 
-<div>
-    <form method=post enctype=#{enctype} action=@{AccountAddUserR accountId} >
-      ^{accountAddUserWidget}
-      <div>
-          <input type=submit value="Add User to Account">
+    <div .span3>
+        <form method=post enctype=#{enctype} action=@{AccountAddUserR accountId} >
+          ^{accountAddUserWidget}
+          <div>
+              <input type=submit value="Add User to Account">
+    <div .span3>
+        <a href=@{AccountTimeResetR accountId} .btn>Reset players' time
