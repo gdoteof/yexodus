@@ -1,6 +1,6 @@
 <div .row>
     <div .span12>
-        <table .table>
+        <table .table .tablesorter>
             <thead>
                 <tr>
                     <th>Player

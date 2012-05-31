@@ -16,7 +16,8 @@ import Data.List (groupBy, sort, sortBy)
 import Data.Function (on)
 import Data.List (head)
 import Control.Arrow
-
+import Text.CSV
+import Data.Text (pack,unpack)
 
 data PlayerReport = PlayerReport {
      startUTC   :: UTCTime 
@@ -44,13 +45,9 @@ createPrintableReport pr = do
         manSessions <- selectList [ManualSessionAccount ==. userId] []
         let gsPlayer = joinTables gamingSessionPlayer sessions players
         let msPlayer = joinTables manualSessionPlayer manSessions players
-        liftIO $ putStrLn $ "ms before collapse"
-        liftIO $ putStrLn $ groom msPlayer
         let gsPlayer' = collapse' $ sortBy soryByPlayer gsPlayer
         let msPlayer' = collapse' $ sortBy soryByPlayer msPlayer
-        liftIO $ putStrLn $ "ms after collapse"
-        liftIO $ putStrLn $ groom msPlayer'
-        let report' = marry'  gsPlayer' msPlayer'
+        let report' = reverse.sortBy sortByTime $ marry'  gsPlayer' msPlayer'
         return report' 
 
     case numPlayers pr of
@@ -60,6 +57,10 @@ createPrintableReport pr = do
           soryByPlayer (s1,p1) (s2,p2) 
             | p1 > p2 = GT
             | p1 < p2 = LT
+            | otherwise = EQ
+          sortByTime (_,_,_,time,_,_,_) (_,_,_,time2,_,_,_)
+            | time > time2 = GT
+            | time < time2 = LT
             | otherwise = EQ
           marry' :: [([Entity GamingSession], Entity Player)] ->  [([Entity ManualSession], Entity Player)] -> PrintablePR
           marry' [] [] = []
@@ -129,7 +130,8 @@ postReportFormR = do
             let startUTC' = localTimeToUTC (accountTimeZone account) $ LocalTime startDay midnight
             let endUTC'   = localTimeToUTC (accountTimeZone account) $ LocalTime endDay   midnight
             report <- createPrintableReport $ PlayerReport startUTC' endUTC' numPlayers
-            liftIO $ putStrLn $ groom report
+            --let csvReady = map (\(eplayer,esessions,eMsessions,earnedMinutes,earnedPoints,manualMinutes,manualPoints)-> [(unpack $ playerName $ entityVal eplayer), (show $ length esessions), (show $ length eMsessions) , (show $ earnedMinutes), (show $  earnedPoints) , (show $ manualMinutes), (show $ manualPoints), (show $  (+) earnedMinutes manualMinutes), (show $  (+) earnedPoints manualPoints)]) report
+            --liftIO $ putStrLn $ printCSV $ ["Player", "# Sessions", " # Audits", "Time Clocked", "Points Earned", "Time Auditing", "Points Auditing", "Total Time", "Total Points"] : csvReady
             defaultLayout $ do
                 $(widgetFile "report/postReportForm")
         _ -> do

@@ -234,6 +234,7 @@ playerAutoCompleteWidget = do
         addScriptRemote "/static/js/bootstrap-modal.js"
         addScriptRemote "/static/js/bootstrap-dropdown.js"
         addScriptRemote "/static/js/bootstrap-collapse.js"
+        addScriptRemote "/static/js/jquery.tablesorter.min.js"
         players <- lift $ runDB $ selectList [] [Desc PlayerName]
         let playersJSON = toJSON $ Prelude.map (\player -> Data.Aeson.object ["label".=(label player),"value".=(toPathPiece (entityKey player))]) players
         toWidget[julius| 
