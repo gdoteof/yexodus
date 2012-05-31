@@ -115,6 +115,7 @@ executable         Exodus
                  , old-locale
                  , mime-mail
                  , groom
+                 , csv
 
                  , yesod-test
 test-suite integration-tests
