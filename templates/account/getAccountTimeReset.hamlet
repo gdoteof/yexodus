@@ -1,0 +1,6 @@
+<div .row>
+    <div .span3>
+        You can't undo this.
+        <form action=@{AccountTimeResetR accountId} method=post>
+            <button type="submit" .btn>Reset Time
+

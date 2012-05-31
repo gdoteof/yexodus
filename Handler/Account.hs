@@ -5,6 +5,8 @@ module Handler.Account
     , getAccountEditR
     , postAccountEditR
     , postAccountAddUserR
+    , getAccountTimeResetR
+    , postAccountTimeResetR
     )
 where
 
@@ -14,6 +16,15 @@ import Data.Maybe
 accountForm :: Form Account
 accountForm = renderDivs $ Account
     <$> areq   textField "Name" Nothing
+
+accountFormDefaults :: Entity Account -> Form Account
+accountFormDefaults eaccount = renderDivs $ Account
+    <$> areq   textField "Name" (Just $ accountName $ entityVal $ eaccount)
+
+accountAddUserForm :: AccountId -> Form (Text, AccountId)
+accountAddUserForm accountId = renderDivs $ (,)
+    <$> areq   textField "User email address" Nothing 
+    <*> pure accountId
 
 
 getAccountR :: AccountId -> Handler RepHtml
@@ -46,10 +57,6 @@ getAccountEditR accountId = do
           setTitle "Account Exit"
           $(widgetFile "account/accountEdit")
 
-accountFormDefaults :: Entity Account -> Form Account
-accountFormDefaults eaccount = renderDivs $ Account
-    <$> areq   textField "Name" (Just $ accountName $ entityVal $ eaccount)
-
 postAccountEditR :: AccountId -> Handler RepHtml
 postAccountEditR accountId = do
         account <- runDB $ get404 accountId
@@ -62,11 +69,6 @@ postAccountEditR accountId = do
             _ -> redirect $ AccountEditR accountId
 
 
-accountAddUserForm :: AccountId -> Form (Text, AccountId)
-accountAddUserForm accountId = renderDivs $ (,)
-    <$> areq   textField "User email address" Nothing 
-    <*> pure accountId
-
 postAccountAddUserR :: AccountId -> Handler RepHtml
 postAccountAddUserR accountId = do
     ((res,accountAddUserWidget),enctype) <- runFormPost $ accountAddUserForm accountId
@@ -76,8 +78,16 @@ postAccountAddUserR accountId = do
             case meemail of
                 Just eemail  -> do
                     runDB $ update (fromJust $ emailUser $ entityVal eemail) [UserAccount =. (Just accountId)]
-                    setMessage $ toHtml $ email `mappend` " added to account" 
                     redirect $ AccountR accountId
                 Nothing -> do
                     setMessage $ toHtml $ "No user registered with " `mappend` email
                     redirect $ AccountEditR accountId
+
+getAccountTimeResetR :: AccountId -> Handler RepHtml
+getAccountTimeResetR accountId = defaultLayout $ do
+            $(widgetFile "account/getAccountTimeReset")
+
+postAccountTimeResetR :: AccountId -> Handler RepHtml
+postAccountTimeResetR accountId = do
+    runDB $ updateWhere [] [PlayerPoints =. 0, PlayerMinutes =.0]
+    redirect $ AccountEditR accountId

@@ -25,6 +25,7 @@
 /account/#AccountId AccountR GET
 /account/#AccountId/edit AccountEditR GET POST
 /account/#AccountId/adduser AccountAddUserR POST
+/account/#AccountId/time AccountTimeResetR GET POST
 
 /top100 Top100R GET
 /report ReportFormR GET POST
